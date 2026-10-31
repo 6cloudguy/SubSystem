@@ -6,53 +6,7 @@ import {
   DEFAULT_ADMIN_PASSWORD,
   DEFAULT_STAFF_PASSWORD,
   DEFAULT_CUSTOMER_PASSWORD,
-  DEFAULT_ADMIN_HASH,
-  DEFAULT_STAFF_HASH,
-  DEFAULT_CUSTOMER_HASH,
 } from '@/lib/auth/password';
-// Embedded fallback users (used when DB is unreachable)
-const fallbackUsers = [
-  {
-    id: 'user-1',
-    name: 'Sarah Connor',
-    email: 'sarah.admin@brightloop.io',
-    role: 'ADMIN' as const,
-    status: 'ACTIVE' as const,
-    assignedCustomersCount: 12,
-    createdAt: '2026-01-15T09:00:00Z',
-    passwordHash: '$2b$10$7hHVnWTrqYiXWsfb8yN44OasO.TNSHXigqVyVxjHIA4rL84.crUcS',
-  },
-  {
-    id: 'user-2',
-    name: 'Alex Rivera',
-    email: 'alex.rivera@brightloop.io',
-    role: 'INTERNAL_STAFF' as const,
-    status: 'ACTIVE' as const,
-    assignedCustomersCount: 8,
-    createdAt: '2026-02-01T10:30:00Z',
-    passwordHash: '$2b$10$RT/0M1zc1HoHp8mMRhxzIelz16JrHg5zaI9qIi5OZkeySPWPWDBU.',
-  },
-  {
-    id: 'user-3',
-    name: 'Jordan Lee',
-    email: 'jordan.lee@brightloop.io',
-    role: 'INTERNAL_STAFF' as const,
-    status: 'ACTIVE' as const,
-    assignedCustomersCount: 6,
-    createdAt: '2026-03-10T14:15:00Z',
-    passwordHash: '$2b$10$RT/0M1zc1HoHp8mMRhxzIelz16JrHg5zaI9qIi5OZkeySPWPWDBU.',
-  },
-  {
-    id: 'user-4',
-    name: 'Marcus Vance',
-    email: 'marcus.v@brightloop.io',
-    role: 'INTERNAL_STAFF' as const,
-    status: 'INACTIVE' as const,
-    assignedCustomersCount: 0,
-    createdAt: '2026-01-20T11:00:00Z',
-    passwordHash: '$2b$10$RT/0M1zc1HoHp8mMRhxzIelz16JrHg5zaI9qIi5OZkeySPWPWDBU.',
-  },
-];
 import { User, UserRole, UserStatus } from '@/lib/types';
 
 export interface SafeUser {
@@ -99,19 +53,14 @@ export function toSafeUser(user: any): SafeUser {
 /**
  * Determine default password for initial seed accounts
  */
-function getDefaultPasswordForEmail(email: string): string | null {
-  const normalized = email.toLowerCase().trim();
-  if (normalized.includes('admin') || normalized === 'sarah.admin@brightloop.io') {
-    return DEFAULT_ADMIN_PASSWORD;
-  }
-  if (normalized.includes('customer')) {
-    return DEFAULT_CUSTOMER_PASSWORD;
-  }
+function getDefaultPasswordForRole(role?: string): string {
+  if (role === 'ADMIN') return DEFAULT_ADMIN_PASSWORD;
+  if (role === 'CUSTOMER') return DEFAULT_CUSTOMER_PASSWORD;
   return DEFAULT_STAFF_PASSWORD;
 }
 
 /**
- * Find user by email in PostgreSQL or fallback
+ * Find user by email in PostgreSQL
  */
 export async function findUserByEmail(email: string) {
   const normalized = email.toLowerCase().trim();
@@ -122,20 +71,7 @@ export async function findUserByEmail(email: string) {
     });
     if (dbUser) return { user: dbUser, fromDb: true };
   } catch (error) {
-    // Database unreachable or offline - fall back to mock data
-  }
-
-  // Fallback to fallbackUsers
-  const mockUser = fallbackUsers.find((u) => u.email.toLowerCase() === normalized);
-  if (mockUser) {
-    return {
-      user: {
-        ...mockUser,
-        passwordHash:
-          mockUser.role === 'ADMIN' ? DEFAULT_ADMIN_HASH : DEFAULT_STAFF_HASH,
-      },
-      fromDb: false,
-    };
+    console.error('[userService] Database query error finding user:', error);
   }
 
   return { user: null, fromDb: false };
@@ -164,7 +100,7 @@ export async function authenticateUser(email: string, passwordPlain: string) {
     isMatch = await verifyPassword(passwordPlain, user.passwordHash);
   } else {
     // Case 2: Database has blank or unmigrated hash - check if matches expected default password
-    const defaultExpected = getDefaultPasswordForEmail(user.email);
+    const defaultExpected = getDefaultPasswordForRole(user.role);
     if (defaultExpected && passwordPlain === defaultExpected) {
       isMatch = true;
     }
@@ -266,7 +202,7 @@ export async function updateUserPassword(email: string, newPasswordPlain: string
   }
 
   const normalized = email.toLowerCase().trim();
-  const { user, fromDb } = await findUserByEmail(normalized);
+  const { user } = await findUserByEmail(normalized);
 
   if (!user) {
     return { success: false, error: 'No account found with this email address.' };
@@ -274,20 +210,16 @@ export async function updateUserPassword(email: string, newPasswordPlain: string
 
   const newHash = await hashPassword(newPasswordPlain);
 
-  if (fromDb) {
-    try {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          passwordHash: newHash,
-          updatedAt: new Date(),
-        },
-      });
-      return { success: true, message: 'Password has been securely updated in the database.' };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Database error updating password.' };
-    }
+  try {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: newHash,
+        updatedAt: new Date(),
+      },
+    });
+    return { success: true, message: 'Password has been securely updated in the database.' };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Database error updating password.' };
   }
-
-  return { success: true, message: 'Password updated successfully (mock mode).' };
 }

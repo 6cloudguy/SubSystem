@@ -21,8 +21,8 @@ export function ProductModal({ isOpen, onClose, productToEdit }: ProductModalPro
 
   const [name, setName] = useState('');
   const [type, setType] = useState<Product['type']>('SOFTWARE');
-  const [salesPrice, setSalesPrice] = useState<number>(100);
-  const [costPrice, setCostPrice] = useState<number>(20);
+  const [salesPrice, setSalesPrice] = useState<number>(0);
+  const [costPrice, setCostPrice] = useState<number>(0);
   const [status, setStatus] = useState<Product['status']>('ACTIVE');
   const [notes, setNotes] = useState('');
   const [variants, setVariants] = useState<ProductVariant[]>([]);
@@ -39,8 +39,8 @@ export function ProductModal({ isOpen, onClose, productToEdit }: ProductModalPro
     } else {
       setName('');
       setType('SOFTWARE');
-      setSalesPrice(100);
-      setCostPrice(20);
+      setSalesPrice(0);
+      setCostPrice(0);
       setStatus('ACTIVE');
       setNotes('');
       setVariants([]);

@@ -41,12 +41,12 @@ export function QuotationModal({ isOpen, onClose, preselectedCustomerId }: Quota
     {
       id: `draft-${Date.now()}-1`,
       productId: products[0]?.id || '',
-      description: products[0]?.name || 'Standard License',
+      description: products[0]?.name || '',
       quantity: 1,
-      unitPrice: products[0]?.salesPrice || 299,
+      unitPrice: products[0]?.salesPrice || 0,
       taxRate: 8.25,
       discountAmount: 0,
-      lineTotal: products[0]?.salesPrice || 299,
+      lineTotal: products[0]?.salesPrice || 0,
     },
   ]);
 

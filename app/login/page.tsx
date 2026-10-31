@@ -45,13 +45,6 @@ export default function LoginPage() {
   // Password policy live validation for reset / new password
   const policyCheck = validatePasswordPolicy(mode === 'reset' ? newPassword : password);
 
-  // Quick fill demo personas
-  const fillCredentials = (personaEmail: string, personaPass: string) => {
-    setEmail(personaEmail);
-    setPassword(personaPass);
-    setErrorMessage(null);
-  };
-
   // Handle Login submission
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,10 +114,6 @@ export default function LoginPage() {
 
       if (res.ok && data.success) {
         setSuccessMessage(data.message);
-        // If test account exists, allow directly transitioning to set new password
-        if (data.testAccountExists) {
-          setTimeout(() => setMode('reset'), 1500);
-        }
       } else {
         setErrorMessage(data.error || 'Failed to request password reset.');
       }
@@ -213,10 +202,6 @@ export default function LoginPage() {
               <ArrowLeft className="h-3.5 w-3.5" />
               <span>Back to Home</span>
             </Link>
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#FFF0E6] text-[#FF6B00] border border-[#FF6B00]/20">
-              <span className="h-2 w-2 rounded-full bg-[#FF6B00] animate-pulse" />
-              Crisp Minimal Orange
-            </span>
           </div>
         </div>
       </header>
@@ -282,7 +267,7 @@ export default function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="e.g. sarah.admin@brightloop.io"
+                      placeholder="name@company.com"
                       className="block w-full rounded-[8px] border border-[#DEE2E6] bg-[#FFFFFF] pl-9 pr-3 py-2.5 text-sm text-[#121212] placeholder-[#6C757D]/60 focus:border-[#FF6B00] focus:outline-none focus:ring-2 focus:ring-[#FF6B00]/20 transition-all"
                     />
                   </div>
@@ -379,7 +364,7 @@ export default function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="e.g. sarah.admin@brightloop.io"
+                      placeholder="name@company.com"
                       className="block w-full rounded-[8px] border border-[#DEE2E6] bg-[#FFFFFF] pl-9 pr-3 py-2.5 text-sm text-[#121212] placeholder-[#6C757D]/60 focus:border-[#FF6B00] focus:outline-none focus:ring-2 focus:ring-[#FF6B00]/20 transition-all"
                     />
                   </div>
@@ -403,6 +388,20 @@ export default function LoginPage() {
                     className="flex-1 h-10 px-4 rounded-[8px] bg-[#FF6B00] hover:bg-[#E56000] active:bg-[#CC5500] text-[#FFFFFF] font-semibold text-xs shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors disabled:opacity-50"
                   >
                     {isLoading ? 'Sending Link...' : 'Send Reset Link'}
+                  </button>
+                </div>
+
+                <div className="pt-2 text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('reset');
+                      setErrorMessage(null);
+                      setSuccessMessage(null);
+                    }}
+                    className="text-xs text-[#FF6B00] hover:underline font-medium"
+                  >
+                    Already have a reset authorization? Set new password
                   </button>
                 </div>
               </form>
@@ -500,60 +499,6 @@ export default function LoginPage() {
                 </div>
               </form>
             )}
-
-            {/* Quick Demo Accounts Helper (Section 3.3 Dev Environment) */}
-            <div className="mt-8 pt-6 border-t border-[#DEE2E6]">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-bold text-[#6C757D] uppercase tracking-wider">
-                  Development Demo Accounts
-                </span>
-                <span className="text-[10px] bg-[#F1F3F5] text-[#121212] px-2 py-0.5 rounded-full font-mono border border-[#DEE2E6]">
-                  bcrypt hashed
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                {/* Admin Persona */}
-                <button
-                  type="button"
-                  onClick={() => fillCredentials('sarah.admin@brightloop.io', 'Admin@BrightLoop2026!')}
-                  className="p-2.5 rounded-[8px] border border-[#DEE2E6] hover:border-[#FF6B00] hover:bg-[#FFF0E6]/30 bg-[#FFFFFF] text-left transition-all group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#121212] group-hover:text-[#FF6B00]">
-                      Sarah Connor
-                    </span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-purple-100 text-purple-700">
-                      Admin
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#6C757D] truncate mt-1">sarah.admin@brightloop.io</p>
-                  <p className="text-[10px] font-mono text-[#6C757D] mt-0.5 truncate">Pass: Admin@BrightLoop2026!</p>
-                </button>
-
-                {/* Staff Persona */}
-                <button
-                  type="button"
-                  onClick={() => fillCredentials('alex.rivera@brightloop.io', 'Staff@BrightLoop2026!')}
-                  className="p-2.5 rounded-[8px] border border-[#DEE2E6] hover:border-[#FF6B00] hover:bg-[#FFF0E6]/30 bg-[#FFFFFF] text-left transition-all group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#121212] group-hover:text-[#FF6B00]">
-                      Alex Rivera
-                    </span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-700">
-                      Staff
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#6C757D] truncate mt-1">alex.rivera@brightloop.io</p>
-                  <p className="text-[10px] font-mono text-[#6C757D] mt-0.5 truncate">Pass: Staff@BrightLoop2026!</p>
-                </button>
-              </div>
-
-              <p className="text-[11px] text-[#6C757D] text-center mt-3">
-                Click any persona above to auto-fill credentials meeting the password policy.
-              </p>
-            </div>
           </div>
 
           {/* Security & System Info Footer */}

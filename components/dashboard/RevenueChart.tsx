@@ -93,7 +93,7 @@ export function RevenueChart() {
             </CardDescription>
           </div>
           <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-medium">
-            Live Database Data
+            Past 6 Months
           </span>
         </div>
       </CardHeader>

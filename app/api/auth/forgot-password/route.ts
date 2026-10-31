@@ -11,13 +11,12 @@ export async function POST(request: NextRequest) {
 
     const { user } = await findUserByEmail(email);
 
-    // Return generic message to prevent email enumeration, but with simulated link for testing
+    // Standard secure response preventing email enumeration
     return NextResponse.json({
       success: true,
       message: user
         ? `A password reset link has been dispatched to ${email}. Please check your inbox.`
         : `If an active account exists for ${email}, a password reset link has been sent.`,
-      testAccountExists: !!user,
     });
   } catch (error: any) {
     return NextResponse.json(
