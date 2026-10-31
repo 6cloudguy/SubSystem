@@ -16,14 +16,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full space-y-1.5">
         {label && (
-          <label htmlFor={generatedId} className="block text-xs font-semibold text-slate-700 tracking-wide">
+          <label htmlFor={generatedId} className="block text-xs font-semibold text-sub-base tracking-wide">
             {label}
             {props.required && <span className="text-rose-500 ml-1">*</span>}
           </label>
         )}
         <div className="relative rounded-lg shadow-2xs">
           {leftIcon && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-sub-muted">
               {leftIcon}
             </div>
           )}
@@ -32,9 +32,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={type}
             ref={ref}
             className={cn(
-              'block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400',
-              'focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20',
-              'disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500',
+              'block w-full rounded-lg border border-sub-border bg-white px-3 py-2 text-sm text-sub-base placeholder-sub-muted',
+              'focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20',
+              'disabled:cursor-not-allowed disabled:bg-surface-subtle disabled:text-sub-muted',
               leftIcon && 'pl-9',
               rightIcon && 'pr-9',
               error && 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20',
@@ -43,7 +43,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightIcon && (
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-sub-muted">
               {rightIcon}
             </div>
           )}
@@ -51,7 +51,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {error ? (
           <p className="text-xs text-rose-600 font-medium">{error}</p>
         ) : helperText ? (
-          <p className="text-xs text-slate-500">{helperText}</p>
+          <p className="text-xs text-sub-muted">{helperText}</p>
         ) : null}
       </div>
     );

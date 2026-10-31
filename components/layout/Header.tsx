@@ -7,132 +7,82 @@ import {
   Search,
   Plus,
   Bell,
-  Database,
-  ArrowUpDown,
   FileCheck2,
   CreditCard,
   UserPlus,
-  Check,
+  ChevronDown,
+  User,
+  Settings,
 } from 'lucide-react';
 import Link from 'next/link';
 
-export function Header({ onQuickAction }: { onQuickAction?: (action: string) => void }) {
-  const { currentUser, setCurrentUser, users, invoices } = useApp();
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
+export function Header() {
+  const { currentUser, invoices } = useApp();
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const overdueInvoices = invoices.filter((i) => i.status === 'OVERDUE');
 
   return (
-    <header className="h-16 border-b border-slate-200 bg-white/95 backdrop-blur-xs flex items-center justify-between px-6 sticky top-0 z-30">
-      {/* Global Quick Search */}
+    <header className="h-16 border-b border-sub-border bg-white flex items-center justify-between px-6 sticky top-0 z-30 shadow-subtle">
+      {/* Global Search Bar */}
       <div className="flex items-center gap-4 flex-1 max-w-md">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sub-muted" />
           <input
             type="text"
-            placeholder="Search customers, subscriptions, invoices, or quotes..."
-            className="w-full pl-9 pr-4 py-1.5 text-xs sm:text-sm bg-slate-100/80 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 text-slate-800 placeholder-slate-400 transition-all"
+            placeholder="Search customers, subscriptions, invoices, or quotations..."
+            className="w-full pl-9 pr-12 py-2 text-xs sm:text-sm bg-surface-hover border border-sub-border rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-sub-base placeholder-sub-muted transition-all"
           />
+          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 pointer-events-none">
+            <kbd className="text-[10px] font-mono bg-white border border-sub-border rounded px-1.5 py-0.5 text-sub-muted shadow-2xs">
+              ⌘K
+            </kbd>
+          </div>
         </div>
       </div>
 
-      {/* Right Controls */}
+      {/* Production Header Controls */}
       <div className="flex items-center gap-3">
-        {/* Environment badge referencing Section 3.3 */}
-        <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-xs font-medium">
-          <Database className="h-3.5 w-3.5 text-emerald-600" />
-          <span>Dev DB: Private LAN</span>
-        </div>
-
-        {/* Role Switcher (Admin vs Internal Staff) */}
-        <div className="relative">
-          <button
-            onClick={() => setShowRoleMenu(!showRoleMenu)}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors text-xs font-medium text-slate-700"
-            title="Switch internal user role to preview permissions"
-          >
-            <span className="text-slate-400">View as:</span>
-            <span className="font-semibold text-slate-900">{currentUser.name}</span>
-            <span
-              className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                currentUser.role === 'ADMIN'
-                  ? 'bg-purple-100 text-purple-700'
-                  : 'bg-emerald-100 text-emerald-700'
-              }`}
-            >
-              {currentUser.role === 'ADMIN' ? 'Admin' : 'Staff'}
-            </span>
-            <ArrowUpDown className="h-3 w-3 text-slate-400 ml-1" />
-          </button>
-
-          {showRoleMenu && (
-            <div className="absolute right-0 mt-2 w-64 rounded-xl border border-slate-200 bg-white shadow-xl p-2 z-50">
-              <div className="px-2.5 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                Switch Test Persona
-              </div>
-              <div className="space-y-1">
-                {users.map((u) => (
-                  <button
-                    key={u.id}
-                    onClick={() => {
-                      setCurrentUser(u);
-                      setShowRoleMenu(false);
-                    }}
-                    className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-slate-100 text-left transition-colors text-xs"
-                  >
-                    <div>
-                      <p className="font-semibold text-slate-800">{u.name}</p>
-                      <p className="text-[11px] text-slate-400">
-                        {u.role === 'ADMIN' ? 'Administrator' : 'Internal Staff'}
-                      </p>
-                    </div>
-                    {currentUser.id === u.id && <Check className="h-4 w-4 text-indigo-600" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Quick Create Dropdown */}
+        {/* Quick Action Button */}
         <div className="relative">
           <Button
             size="sm"
             onClick={() => setShowQuickCreate(!showQuickCreate)}
             icon={<Plus className="h-4 w-4" />}
           >
-            New Action
+            Create
           </Button>
 
           {showQuickCreate && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 bg-white shadow-xl p-2 z-50">
-              <div className="px-2.5 py-1 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                Create Operational Record
+            <div className="absolute right-0 mt-2 w-52 rounded-xl border border-sub-border bg-white shadow-elevated p-1.5 z-50 animate-in fade-in-50 duration-150">
+              <div className="px-2.5 py-1 text-[11px] font-semibold text-sub-muted uppercase tracking-wider">
+                Quick Actions
               </div>
               <div className="space-y-0.5 pt-1 text-xs font-medium">
                 <Link
                   href="/quotations?action=new"
                   onClick={() => setShowQuickCreate(false)}
-                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-700 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-surface-hover text-sub-base hover:text-brand transition-colors"
                 >
-                  <FileCheck2 className="h-4 w-4 text-slate-400" />
+                  <FileCheck2 className="h-4 w-4 text-sub-muted" />
                   <span>New Quotation</span>
                 </Link>
                 <Link
                   href="/payments?action=record"
                   onClick={() => setShowQuickCreate(false)}
-                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-700 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-surface-hover text-sub-base hover:text-brand transition-colors"
                 >
-                  <CreditCard className="h-4 w-4 text-slate-400" />
+                  <CreditCard className="h-4 w-4 text-sub-muted" />
                   <span>Record Payment</span>
                 </Link>
                 <Link
                   href="/customers?action=new"
                   onClick={() => setShowQuickCreate(false)}
-                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-700 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-surface-hover text-sub-base hover:text-brand transition-colors"
                 >
-                  <UserPlus className="h-4 w-4 text-slate-400" />
+                  <UserPlus className="h-4 w-4 text-sub-muted" />
                   <span>Add Customer</span>
                 </Link>
               </div>
@@ -140,21 +90,109 @@ export function Header({ onQuickAction }: { onQuickAction?: (action: string) => 
           )}
         </div>
 
-        {/* Notification indicator */}
+        {/* Notifications Popover */}
         <div className="relative">
           <button
-            className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-500 relative transition-colors"
-            title={
-              overdueInvoices.length > 0
-                ? `${overdueInvoices.length} overdue invoices requiring follow-up`
-                : 'No pending alerts'
-            }
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="p-2 rounded-lg border border-sub-border hover:bg-surface-hover text-sub-muted relative transition-colors"
+            title="Notifications"
           >
             <Bell className="h-4 w-4" />
             {overdueInvoices.length > 0 && (
               <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
             )}
           </button>
+
+          {showNotifications && (
+            <div className="absolute right-0 mt-2 w-80 rounded-xl border border-sub-border bg-white shadow-elevated p-3 z-50">
+              <div className="flex items-center justify-between pb-2 border-b border-sub-border/60">
+                <span className="text-xs font-bold text-sub-base">Notifications</span>
+                {overdueInvoices.length > 0 && (
+                  <span className="text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.2 rounded-full">
+                    {overdueInvoices.length} alert{overdueInvoices.length > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+              <div className="pt-2 space-y-2">
+                {overdueInvoices.length === 0 ? (
+                  <p className="text-xs text-sub-muted py-3 text-center">No unread notifications.</p>
+                ) : (
+                  overdueInvoices.map((inv) => (
+                    <Link
+                      key={inv.id}
+                      href={`/invoices?status=OVERDUE`}
+                      onClick={() => setShowNotifications(false)}
+                      className="block p-2 rounded-lg bg-rose-50/70 border border-rose-100 hover:bg-rose-100/60 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-rose-900">{inv.invoiceNumber}</span>
+                        <span className="text-[10px] text-rose-600 font-bold">OVERDUE</span>
+                      </div>
+                      <p className="text-[11px] text-sub-base mt-0.5">
+                        {inv.customerName} has an unsettled balance.
+                      </p>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="h-6 w-px bg-sub-border" />
+
+        {/* Production User Profile & Account Menu */}
+        <div className="relative">
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-surface-hover transition-colors text-left"
+          >
+            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand to-brand-600 text-white font-bold flex items-center justify-center text-xs shadow-2xs">
+              {currentUser.name
+                ? currentUser.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                : 'U'}
+            </div>
+            <div className="hidden md:block">
+              <p className="text-xs font-semibold text-sub-base leading-none">{currentUser.name}</p>
+              <p className="text-[10px] text-sub-muted font-medium mt-1 leading-none uppercase tracking-wider">
+                {currentUser.role === 'ADMIN' ? 'Administrator' : 'Staff'}
+              </p>
+            </div>
+            <ChevronDown className="h-3.5 w-3.5 text-sub-muted" />
+          </button>
+
+          {showUserMenu && (
+            <div className="absolute right-0 mt-2 w-64 rounded-xl border border-sub-border bg-white shadow-elevated p-2 z-50 animate-in fade-in-50 duration-150">
+              <div className="p-2 border-b border-sub-border/60">
+                <p className="text-xs font-semibold text-sub-base">{currentUser.name}</p>
+                <p className="text-[11px] text-sub-muted truncate mt-0.5">{currentUser.email}</p>
+                <span className="inline-block mt-2 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-surface-subtle text-sub-base border border-sub-border">
+                  {currentUser.role === 'ADMIN' ? 'Administrator' : 'Internal Staff'}
+                </span>
+              </div>
+              <div className="pt-1 space-y-0.5 text-xs text-sub-base">
+                <Link
+                  href="/staff"
+                  onClick={() => setShowUserMenu(false)}
+                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-surface-hover transition-colors"
+                >
+                  <User className="h-4 w-4 text-sub-muted" />
+                  <span>Team & Profile</span>
+                </Link>
+                <Link
+                  href="/pricing"
+                  onClick={() => setShowUserMenu(false)}
+                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-surface-hover transition-colors"
+                >
+                  <Settings className="h-4 w-4 text-sub-muted" />
+                  <span>Preferences & Taxes</span>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>

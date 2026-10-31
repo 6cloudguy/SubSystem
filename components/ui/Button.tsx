@@ -12,14 +12,14 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading = false, icon, children, disabled, ...props }, ref) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:pointer-events-none disabled:opacity-50 rounded-lg select-none';
+      'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:pointer-events-none disabled:opacity-50 rounded-lg select-none';
 
     const variants = {
-      primary: 'bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800 shadow-sm',
-      secondary: 'bg-slate-100 text-slate-800 hover:bg-slate-200 active:bg-slate-300 border border-slate-200',
-      outline: 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 active:bg-slate-100 shadow-xs',
+      primary: 'bg-brand text-white hover:bg-brand-hover active:bg-brand-active shadow-sm',
+      secondary: 'bg-white text-sub-base hover:bg-surface-hover active:bg-surface-subtle border border-sub-border shadow-2xs',
+      outline: 'border border-sub-border bg-white text-sub-base hover:bg-surface-hover active:bg-surface-subtle shadow-xs',
       danger: 'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 shadow-sm',
-      ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+      ghost: 'text-sub-muted hover:bg-surface-hover hover:text-sub-base',
       success: 'bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm',
     };
 

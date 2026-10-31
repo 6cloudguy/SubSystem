@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -13,17 +13,44 @@ import {
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { formatCurrency } from '@/lib/utils';
-
-const monthlyData = [
-  { month: 'May 26', invoiced: 2800, cash: 2600 },
-  { month: 'Jun 26', invoiced: 3400, cash: 3100 },
-  { month: 'Jul 26', invoiced: 4100, cash: 3900 },
-  { month: 'Aug 26', invoiced: 5200, cash: 4800 },
-  { month: 'Sep 26', invoiced: 6100, cash: 5400 },
-  { month: 'Oct 26', invoiced: 8249, cash: 6099 },
-];
+import { useApp } from '@/lib/AppContext';
 
 export function RevenueChart() {
+  const { invoices, payments } = useApp();
+
+  const chartData = useMemo(() => {
+    // Generate past 6 months
+    const months: { [key: string]: { month: string; invoiced: number; cash: number } } = {};
+    const now = new Date();
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      months[key] = { month: label, invoiced: 0, cash: 0 };
+    }
+
+    // Aggregate DB invoices
+    invoices.forEach((inv) => {
+      if (!inv.issueDate) return;
+      const key = inv.issueDate.substring(0, 7);
+      if (months[key]) {
+        months[key].invoiced += Number(inv.totalAmount) || 0;
+      }
+    });
+
+    // Aggregate DB payments
+    payments.forEach((pay) => {
+      if (!pay.date) return;
+      const key = pay.date.substring(0, 7);
+      if (months[key]) {
+        months[key].cash += Number(pay.amount) || 0;
+      }
+    });
+
+    return Object.values(months);
+  }, [invoices, payments]);
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -31,24 +58,24 @@ export function RevenueChart() {
           <div>
             <CardTitle>Invoiced Revenue vs Cash Received</CardTitle>
             <CardDescription>
-              Compares billed amounts against settled cash collections (Section 2.6 specification)
+              Live database metrics: billed invoices vs settled payments
             </CardDescription>
           </div>
           <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-medium">
-            Past 6 Months
+            Live Database Data
           </span>
         </div>
       </CardHeader>
       <CardContent className="h-80 pt-4">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+          <BarChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
             <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} />
             <YAxis
               stroke="#94a3b8"
               fontSize={12}
               tickLine={false}
-              tickFormatter={(v) => `$${v / 1000}k`}
+              tickFormatter={(v) => `$${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`}
             />
             <Tooltip
               formatter={(value: any) => [formatCurrency(Number(value) || 0), '']}
@@ -67,7 +94,7 @@ export function RevenueChart() {
             <Bar
               name="Invoiced Total"
               dataKey="invoiced"
-              fill="#6366f1"
+              fill="#FF6B00"
               radius={[4, 4, 0, 0]}
               maxBarSize={36}
             />

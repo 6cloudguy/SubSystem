@@ -25,7 +25,7 @@ export default function DashboardPage() {
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
                 Welcome back, {currentUser.name}
               </h1>
-              <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-brand-50 text-brand-700 border border-brand-200">
                 {currentUser.role === 'ADMIN' ? 'Administrator' : 'Internal Staff'}
               </span>
             </div>
@@ -36,7 +36,7 @@ export default function DashboardPage() {
 
           <div className="flex items-center gap-2.5 flex-wrap">
             <Link href="/quotations?action=new">
-              <Button size="sm" variant="outline" icon={<FileCheck2 className="h-4 w-4 text-indigo-600" />}>
+              <Button size="sm" variant="outline" icon={<FileCheck2 className="h-4 w-4 text-brand" />}>
                 New Quote
               </Button>
             </Link>

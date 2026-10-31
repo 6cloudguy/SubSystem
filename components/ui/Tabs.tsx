@@ -34,7 +34,7 @@ export function Tabs({ defaultValue, value, onValueChange, className, children }
 
 export function TabList({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
-    <div className={cn('inline-flex items-center gap-1 rounded-xl bg-slate-100 p-1 border border-slate-200/60', className)}>
+    <div className={cn('inline-flex items-center gap-1 rounded-xl bg-surface-subtle p-1 border border-sub-border', className)}>
       {children}
     </div>
   );
@@ -62,8 +62,8 @@ export function TabTrigger({
       className={cn(
         'inline-flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all',
         isActive
-          ? 'bg-white text-indigo-700 shadow-2xs font-semibold'
-          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50',
+          ? 'bg-white text-brand shadow-2xs font-semibold'
+          : 'text-sub-muted hover:text-sub-base hover:bg-surface-hover',
         className
       )}
     >
@@ -72,7 +72,7 @@ export function TabTrigger({
         <span
           className={cn(
             'rounded-full px-2 py-0.2 text-xs font-semibold',
-            isActive ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-200 text-slate-700'
+            isActive ? 'bg-brand-50 text-brand' : 'bg-slate-200 text-slate-700'
           )}
         >
           {badge}

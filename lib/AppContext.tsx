@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Customer,
   Product,
@@ -13,21 +13,7 @@ import {
   Discount,
   User,
   DashboardMetrics,
-  SubscriptionEvent,
 } from './types';
-import {
-  initialUsers,
-  initialCustomers,
-  initialProducts,
-  initialPlans,
-  initialQuotations,
-  initialSubscriptions,
-  initialInvoices,
-  initialPayments,
-  initialTaxRules,
-  initialDiscounts,
-} from './mockData';
-import { generateDocNumber } from './utils';
 
 interface ToastMessage {
   id: string;
@@ -39,38 +25,38 @@ interface AppContextType {
   currentUser: User;
   setCurrentUser: (user: User) => void;
   users: User[];
-  addUser: (user: Omit<User, 'id' | 'createdAt'>) => void;
-  updateUser: (id: string, updates: Partial<User>) => void;
+  addUser: (user: Omit<User, 'id' | 'createdAt'>) => Promise<void>;
+  updateUser: (id: string, updates: Partial<User>) => Promise<void>;
 
   customers: Customer[];
-  addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'totalSpent' | 'outstandingBalance'>) => Customer;
-  updateCustomer: (id: string, updates: Partial<Customer>) => void;
+  addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'totalSpent' | 'outstandingBalance'>) => Promise<Customer>;
+  updateCustomer: (id: string, updates: Partial<Customer>) => Promise<void>;
 
   products: Product[];
-  addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => Product;
-  updateProduct: (id: string, updates: Partial<Product>) => void;
+  addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => Promise<Product>;
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
 
   plans: Plan[];
-  addPlan: (plan: Omit<Plan, 'id'>) => Plan;
-  updatePlan: (id: string, updates: Partial<Plan>) => void;
+  addPlan: (plan: Omit<Plan, 'id'>) => Promise<Plan>;
+  updatePlan: (id: string, updates: Partial<Plan>) => Promise<void>;
 
   quotations: Quotation[];
-  addQuotation: (quotation: Omit<Quotation, 'id' | 'createdAt' | 'quotationNumber'>) => Quotation;
-  updateQuotation: (id: string, updates: Partial<Quotation>) => void;
-  convertQuotationToSubscription: (quotationId: string) => Subscription | null;
+  addQuotation: (quotation: Omit<Quotation, 'id' | 'createdAt' | 'quotationNumber'>) => Promise<Quotation>;
+  updateQuotation: (id: string, updates: Partial<Quotation>) => Promise<void>;
+  convertQuotationToSubscription: (quotationId: string) => Promise<Subscription | null>;
 
   subscriptions: Subscription[];
-  addSubscription: (sub: Omit<Subscription, 'id' | 'createdAt' | 'subscriptionNumber' | 'events'>) => Subscription;
-  pauseSubscription: (id: string, reason: string, expectedResumeDate?: string) => void;
-  resumeSubscription: (id: string, note?: string) => void;
-  renewSubscription: (id: string, newEndDate: string, note?: string) => void;
-  closeSubscription: (id: string, reason: string) => void;
-  generateRecurringInvoice: (subscriptionId: string) => Invoice | null;
+  addSubscription: (sub: Omit<Subscription, 'id' | 'createdAt' | 'subscriptionNumber' | 'events'>) => Promise<Subscription>;
+  pauseSubscription: (id: string, reason: string, expectedResumeDate?: string) => Promise<void>;
+  resumeSubscription: (id: string, note?: string) => Promise<void>;
+  renewSubscription: (id: string, newEndDate: string, note?: string) => Promise<void>;
+  closeSubscription: (id: string, reason: string) => Promise<void>;
+  generateRecurringInvoice: (subscriptionId: string) => Promise<Invoice | null>;
 
   invoices: Invoice[];
-  addInvoice: (invoice: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber' | 'amountPaid' | 'balanceDue'>) => Invoice;
-  confirmInvoice: (id: string) => void;
-  cancelInvoice: (id: string, reason?: string) => void;
+  addInvoice: (invoice: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber' | 'amountPaid' | 'balanceDue'>) => Promise<Invoice>;
+  confirmInvoice: (id: string) => Promise<void>;
+  cancelInvoice: (id: string, reason?: string) => Promise<void>;
 
   payments: Payment[];
   recordPayment: (payment: {
@@ -81,432 +67,473 @@ interface AppContextType {
     reference: string;
     notes?: string;
     allocations: { invoiceId: string; amount: number }[];
-  }) => Payment;
+  }) => Promise<Payment>;
 
   taxRules: TaxRule[];
-  addTaxRule: (rule: Omit<TaxRule, 'id'>) => void;
-  updateTaxRule: (id: string, updates: Partial<TaxRule>) => void;
+  addTaxRule: (rule: Omit<TaxRule, 'id'>) => Promise<void>;
+  updateTaxRule: (id: string, updates: Partial<TaxRule>) => Promise<void>;
 
   discounts: Discount[];
-  addDiscount: (discount: Omit<Discount, 'id' | 'usageCount'>) => void;
-  updateDiscount: (id: string, updates: Partial<Discount>) => void;
+  addDiscount: (discount: Omit<Discount, 'id' | 'usageCount'>) => Promise<void>;
+  updateDiscount: (id: string, updates: Partial<Discount>) => Promise<void>;
 
   metrics: DashboardMetrics;
+  isLoading: boolean;
+  refreshData: () => Promise<void>;
 
   toasts: ToastMessage[];
   showToast: (message: string, type?: ToastMessage['type']) => void;
   removeToast: (id: string) => void;
 }
 
+const defaultUser: User = {
+  id: 'user-default',
+  name: 'Sarah Connor',
+  email: 'sarah.admin@brightloop.io',
+  role: 'ADMIN',
+  status: 'ACTIVE',
+  createdAt: new Date().toISOString(),
+};
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [currentUser, setCurrentUser] = useState<User>(initialUsers[0]); // default Sarah Connor (Admin)
-  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [plans, setPlans] = useState<Plan[]>(initialPlans);
-  const [quotations, setQuotations] = useState<Quotation[]>(initialQuotations);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>(initialSubscriptions);
-  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
-  const [payments, setPayments] = useState<Payment[]>(initialPayments);
-  const [taxRules, setTaxRules] = useState<TaxRule[]>(initialTaxRules);
-  const [discounts, setDiscounts] = useState<Discount[]>(initialDiscounts);
+  const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<User>(defaultUser);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [taxRules, setTaxRules] = useState<TaxRule[]>([]);
+  const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const showToast = (message: string, type: ToastMessage['type'] = 'success') => {
+  const showToast = useCallback((message: string, type: ToastMessage['type'] = 'success') => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 4500);
-  };
+  }, []);
 
-  const removeToast = (id: string) => {
+  const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  }, []);
+
+  // Fetch all initial data from Postgres via API routes
+  const refreshData = useCallback(async () => {
+    try {
+      const [
+        usersRes,
+        customersRes,
+        productsRes,
+        plansRes,
+        quotationsRes,
+        subscriptionsRes,
+        invoicesRes,
+        paymentsRes,
+        taxesRes,
+        discountsRes,
+      ] = await Promise.all([
+        fetch('/api/users').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/customers').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/products').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/plans').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/quotations').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/subscriptions').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/invoices').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/payments').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/tax-rules').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/discounts').then((r) => (r.ok ? r.json() : [])),
+      ]);
+
+      setUsers(usersRes);
+      if (usersRes.length > 0) {
+        setCurrentUser((prev) => {
+          const match = usersRes.find((u: User) => u.id === prev.id);
+          return match || usersRes[0];
+        });
+      }
+      setCustomers(customersRes);
+      setProducts(productsRes);
+      setPlans(plansRes);
+      setQuotations(quotationsRes);
+      setSubscriptions(subscriptionsRes);
+      setInvoices(invoicesRes);
+      setPayments(paymentsRes);
+      setTaxRules(taxesRes);
+      setDiscounts(discountsRes);
+    } catch (err) {
+      console.error('Failed to load database data:', err);
+      showToast('Error syncing with database', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [showToast]);
+
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
 
   // User actions
-  const addUser = (userData: Omit<User, 'id' | 'createdAt'>) => {
-    const newUser: User = {
-      ...userData,
-      id: `user-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      assignedCustomersCount: 0,
-      lastActive: 'Never',
-    };
-    setUsers((prev) => [newUser, ...prev]);
-    showToast(`Staff account for ${newUser.name} created successfully.`);
+  const addUser = async (userData: Omit<User, 'id' | 'createdAt'>) => {
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+      if (!res.ok) throw new Error('Failed to create user');
+      const newUser = await res.json();
+      setUsers((prev) => [newUser, ...prev]);
+      showToast(`Staff account for ${newUser.name} created.`);
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
-  const updateUser = (id: string, updates: Partial<User>) => {
-    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...updates } : u)));
-    showToast('Staff member updated.');
+  const updateUser = async (id: string, updates: Partial<User>) => {
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('Failed to update user');
+      const updated = await res.json();
+      setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
+      showToast('Staff member updated.');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
   // Customer actions
-  const addCustomer = (customerData: Omit<Customer, 'id' | 'createdAt' | 'totalSpent' | 'outstandingBalance'>) => {
-    const newCustomer: Customer = {
-      ...customerData,
-      id: `cust-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      totalSpent: 0,
-      outstandingBalance: 0,
-    };
+  const addCustomer = async (customerData: Omit<Customer, 'id' | 'createdAt' | 'totalSpent' | 'outstandingBalance'>) => {
+    const res = await fetch('/api/customers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(customerData),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showToast(err.error || 'Failed to create customer', 'error');
+      throw new Error(err.error || 'Failed to create customer');
+    }
+    const newCustomer = await res.json();
     setCustomers((prev) => [newCustomer, ...prev]);
-    showToast(`Customer "${newCustomer.name}" created.`);
+    showToast(`Customer "${newCustomer.name}" created in database.`);
     return newCustomer;
   };
 
-  const updateCustomer = (id: string, updates: Partial<Customer>) => {
-    setCustomers((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
-    showToast('Customer record updated.');
+  const updateCustomer = async (id: string, updates: Partial<Customer>) => {
+    try {
+      const res = await fetch(`/api/customers/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('Failed to update customer');
+      const updated = await res.json();
+      setCustomers((prev) => prev.map((c) => (c.id === id ? updated : c)));
+      showToast('Customer record updated in database.');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
   // Product actions
-  const addProduct = (productData: Omit<Product, 'id' | 'createdAt'>) => {
-    const newProd: Product = {
-      ...productData,
-      id: `prod-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
+  const addProduct = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showToast(err.error || 'Failed to add product', 'error');
+      throw new Error(err.error || 'Failed to add product');
+    }
+    const newProd = await res.json();
     setProducts((prev) => [newProd, ...prev]);
-    showToast(`Product "${newProd.name}" added to catalog.`);
+    showToast(`Product "${newProd.name}" saved to database.`);
     return newProd;
   };
 
-  const updateProduct = (id: string, updates: Partial<Product>) => {
-    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
-    showToast('Product updated successfully.');
+  const updateProduct = async (id: string, updates: Partial<Product>) => {
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('Failed to update product');
+      const updated = await res.json();
+      setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+      showToast('Product updated successfully in database.');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
   // Plan actions
-  const addPlan = (planData: Omit<Plan, 'id'>) => {
-    const newPlan: Plan = {
-      ...planData,
-      id: `plan-${Date.now()}`,
-      subscribersCount: 0,
-    };
+  const addPlan = async (planData: Omit<Plan, 'id'>) => {
+    const res = await fetch('/api/plans', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(planData),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showToast(err.error || 'Failed to create plan', 'error');
+      throw new Error(err.error || 'Failed to create plan');
+    }
+    const newPlan = await res.json();
     setPlans((prev) => [newPlan, ...prev]);
-    showToast(`Plan "${newPlan.name}" configured.`);
+    showToast(`Plan "${newPlan.name}" configured in database.`);
     return newPlan;
   };
 
-  const updatePlan = (id: string, updates: Partial<Plan>) => {
-    setPlans((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
-    showToast('Plan rules updated.');
+  const updatePlan = async (id: string, updates: Partial<Plan>) => {
+    try {
+      const res = await fetch(`/api/plans/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('Failed to update plan');
+      const updated = await res.json();
+      setPlans((prev) => prev.map((p) => (p.id === id ? updated : p)));
+      showToast('Plan rules updated in database.');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
   // Quotation actions
-  const addQuotation = (quotData: Omit<Quotation, 'id' | 'createdAt' | 'quotationNumber'>) => {
-    const newQuot: Quotation = {
-      ...quotData,
-      id: `quot-${Date.now()}`,
-      quotationNumber: generateDocNumber('QT'),
-      createdAt: new Date().toISOString(),
-    };
+  const addQuotation = async (quotData: Omit<Quotation, 'id' | 'createdAt' | 'quotationNumber'>) => {
+    const res = await fetch('/api/quotations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(quotData),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showToast(err.error || 'Failed to create quotation', 'error');
+      throw new Error(err.error || 'Failed to create quotation');
+    }
+    const newQuot = await res.json();
     setQuotations((prev) => [newQuot, ...prev]);
-    showToast(`Quotation ${newQuot.quotationNumber} generated.`);
+    showToast(`Quotation ${newQuot.quotationNumber} saved in database.`);
     return newQuot;
   };
 
-  const updateQuotation = (id: string, updates: Partial<Quotation>) => {
-    setQuotations((prev) => prev.map((q) => (q.id === id ? { ...q, ...updates } : q)));
-    showToast('Quotation updated.');
+  const updateQuotation = async (id: string, updates: Partial<Quotation>) => {
+    try {
+      const res = await fetch(`/api/quotations/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('Failed to update quotation');
+      const updated = await res.json();
+      setQuotations((prev) => prev.map((q) => (q.id === id ? updated : q)));
+      showToast('Quotation updated in database.');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
-  const convertQuotationToSubscription = (quotationId: string): Subscription | null => {
-    const quot = quotations.find((q) => q.id === quotationId);
-    if (!quot) return null;
-
-    const matchedPlan = plans[0]; // fallback default plan
-    const subNumber = generateDocNumber('SUB');
-    const newSub: Subscription = {
-      id: `sub-${Date.now()}`,
-      subscriptionNumber: subNumber,
-      customerId: quot.customerId,
-      customerName: quot.customerName,
-      planId: matchedPlan.id,
-      planName: matchedPlan.name,
-      billingInterval: matchedPlan.billingInterval,
-      startDate: new Date().toISOString().split('T')[0],
-      nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      paymentTerms: 'Net 30',
-      status: 'CONFIRMED',
-      totalAmount: quot.totalAmount,
-      createdAt: new Date().toISOString(),
-      lines: quot.lines.map((l) => ({
-        id: `sl-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-        productId: l.productId,
-        variantId: l.variantId,
-        description: l.description,
-        quantity: l.quantity,
-        unitPrice: l.unitPrice,
-        taxRate: l.taxRate,
-        discountAmount: l.discountAmount,
-        lineTotal: l.lineTotal,
-      })),
-      events: [
-        {
-          id: `ev-${Date.now()}`,
-          subscriptionId: `sub-${Date.now()}`,
-          eventType: 'CONFIRMED',
-          timestamp: new Date().toISOString(),
-          actor: currentUser.name,
-          note: `Converted from accepted Quotation ${quot.quotationNumber}`,
-        },
-      ],
-    };
-
-    setSubscriptions((prev) => [newSub, ...prev]);
-    setQuotations((prev) =>
-      prev.map((q) => (q.id === quotationId ? { ...q, status: 'CONVERTED', convertedSubscriptionId: newSub.id } : q))
-    );
-    showToast(`Quotation converted to Subscription ${subNumber}!`);
-    return newSub;
+  const convertQuotationToSubscription = async (quotationId: string): Promise<Subscription | null> => {
+    try {
+      const res = await fetch(`/api/quotations/${quotationId}/convert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actor: currentUser.name }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Conversion failed');
+      }
+      const newSub = await res.json();
+      await refreshData();
+      showToast(`Quotation converted to Subscription ${newSub.subscriptionNumber}!`);
+      return newSub;
+    } catch (err: any) {
+      showToast(err.message, 'error');
+      return null;
+    }
   };
 
   // Subscription lifecycle actions
-  const addSubscription = (subData: Omit<Subscription, 'id' | 'createdAt' | 'subscriptionNumber' | 'events'>) => {
-    const subNumber = generateDocNumber('SUB');
-    const newSub: Subscription = {
-      ...subData,
-      id: `sub-${Date.now()}`,
-      subscriptionNumber: subNumber,
-      createdAt: new Date().toISOString(),
-      events: [
-        {
-          id: `ev-${Date.now()}`,
-          subscriptionId: `sub-${Date.now()}`,
-          eventType: 'CREATED',
-          timestamp: new Date().toISOString(),
-          actor: currentUser.name,
-          note: 'Subscription manually created by internal staff.',
-        },
-      ],
-    };
+  const addSubscription = async (subData: Omit<Subscription, 'id' | 'createdAt' | 'subscriptionNumber' | 'events'>) => {
+    const res = await fetch('/api/subscriptions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...subData, actor: currentUser.name }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showToast(err.error || 'Failed to create subscription', 'error');
+      throw new Error(err.error || 'Failed to create subscription');
+    }
+    const newSub = await res.json();
     setSubscriptions((prev) => [newSub, ...prev]);
-    showToast(`Subscription ${subNumber} created.`);
+    showToast(`Subscription ${newSub.subscriptionNumber} created.`);
     return newSub;
   };
 
-  const pauseSubscription = (id: string, reason: string, expectedResumeDate?: string) => {
-    setSubscriptions((prev) =>
-      prev.map((s) => {
-        if (s.id !== id) return s;
-        const newEvent: SubscriptionEvent = {
-          id: `ev-${Date.now()}`,
-          subscriptionId: id,
-          eventType: 'PAUSED',
-          timestamp: new Date().toISOString(),
-          actor: currentUser.name,
-          note: `Subscription paused: ${reason} (Resume target: ${expectedResumeDate || 'Open'})`,
-        };
-        return {
-          ...s,
-          status: 'PAUSED',
-          pauseDate: new Date().toISOString().split('T')[0],
-          resumeExpectedDate: expectedResumeDate,
-          events: [newEvent, ...s.events],
-        };
-      })
-    );
-    showToast('Subscription paused according to plan lifecycle policy.', 'warning');
+  const pauseSubscription = async (id: string, reason: string, expectedResumeDate?: string) => {
+    try {
+      const res = await fetch(`/api/subscriptions/${id}/pause`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason, expectedResumeDate, actor: currentUser.name }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Pause failed');
+      }
+      await refreshData();
+      showToast('Subscription paused according to plan lifecycle policy.', 'warning');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
-  const resumeSubscription = (id: string, note = 'Subscription resumed') => {
-    setSubscriptions((prev) =>
-      prev.map((s) => {
-        if (s.id !== id) return s;
-        const newEvent: SubscriptionEvent = {
-          id: `ev-${Date.now()}`,
-          subscriptionId: id,
-          eventType: 'RESUMED',
-          timestamp: new Date().toISOString(),
-          actor: currentUser.name,
-          note,
-        };
-        return {
-          ...s,
-          status: 'ACTIVE',
-          pauseDate: undefined,
-          resumeExpectedDate: undefined,
-          events: [newEvent, ...s.events],
-        };
-      })
-    );
-    showToast('Subscription resumed and reactivated.');
+  const resumeSubscription = async (id: string, note = 'Subscription resumed') => {
+    try {
+      const res = await fetch(`/api/subscriptions/${id}/resume`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note, actor: currentUser.name }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Resume failed');
+      }
+      await refreshData();
+      showToast('Subscription resumed and reactivated in database.');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
-  const renewSubscription = (id: string, newEndDate: string, note = 'Renewed for next term') => {
-    setSubscriptions((prev) =>
-      prev.map((s) => {
-        if (s.id !== id) return s;
-        const newEvent: SubscriptionEvent = {
-          id: `ev-${Date.now()}`,
-          subscriptionId: id,
-          eventType: 'RENEWED',
-          timestamp: new Date().toISOString(),
-          actor: currentUser.name,
-          note: `${note}. New term until ${newEndDate}`,
-        };
-        return {
-          ...s,
-          status: 'ACTIVE',
-          endDate: newEndDate,
-          events: [newEvent, ...s.events],
-        };
-      })
-    );
-    showToast('Subscription renewed successfully.');
+  const renewSubscription = async (id: string, newEndDate: string, note = 'Renewed for next term') => {
+    try {
+      const res = await fetch(`/api/subscriptions/${id}/renew`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newEndDate, note, actor: currentUser.name }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Renewal failed');
+      }
+      await refreshData();
+      showToast('Subscription renewed successfully in database.');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
-  const closeSubscription = (id: string, reason: string) => {
-    setSubscriptions((prev) =>
-      prev.map((s) => {
-        if (s.id !== id) return s;
-        const newEvent: SubscriptionEvent = {
-          id: `ev-${Date.now()}`,
-          subscriptionId: id,
-          eventType: 'CLOSED',
-          timestamp: new Date().toISOString(),
-          actor: currentUser.name,
-          note: `Early termination: ${reason}`,
-        };
-        return {
-          ...s,
-          status: 'CLOSED',
-          closeReason: reason,
-          events: [newEvent, ...s.events],
-        };
-      })
-    );
-    showToast('Subscription closed.', 'warning');
+  const closeSubscription = async (id: string, reason: string) => {
+    try {
+      const res = await fetch(`/api/subscriptions/${id}/close`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason, actor: currentUser.name }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Close failed');
+      }
+      await refreshData();
+      showToast('Subscription closed in database.', 'warning');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
-  const generateRecurringInvoice = (subscriptionId: string): Invoice | null => {
-    const sub = subscriptions.find((s) => s.id === subscriptionId);
-    if (!sub) return null;
-
-    const invoiceNum = generateDocNumber('INV');
-    const now = new Date();
-    const dueDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-
-    const subtotal = sub.lines.reduce((acc, l) => acc + l.quantity * l.unitPrice, 0);
-    const tax = sub.lines.reduce((acc, l) => acc + ((l.quantity * l.unitPrice * l.taxRate) / 100), 0);
-    const total = Math.round((subtotal + tax) * 100) / 100;
-
-    const newInvoice: Invoice = {
-      id: `inv-${Date.now()}`,
-      invoiceNumber: invoiceNum,
-      customerId: sub.customerId,
-      customerName: sub.customerName,
-      subscriptionId: sub.id,
-      subscriptionNumber: sub.subscriptionNumber,
-      issueDate: now.toISOString().split('T')[0],
-      dueDate: dueDate.toISOString().split('T')[0],
-      status: 'CONFIRMED',
-      currency: 'USD',
-      subtotal,
-      taxAmount: tax,
-      discountAmount: 0,
-      totalAmount: total,
-      amountPaid: 0,
-      balanceDue: total,
-      lines: sub.lines.map((l) => ({
-        id: `il-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-        description: `${l.description} (Billing interval: ${sub.billingInterval})`,
-        quantity: l.quantity,
-        unitPrice: l.unitPrice,
-        taxRate: l.taxRate,
-        discountAmount: l.discountAmount,
-        lineTotal: l.lineTotal,
-      })),
-      notes: `Recurring billing for ${sub.subscriptionNumber}. Payment terms: ${sub.paymentTerms}`,
-      createdAt: now.toISOString(),
-    };
-
-    setInvoices((prev) => [newInvoice, ...prev]);
-
-    // Update customer outstanding balance
-    setCustomers((prev) =>
-      prev.map((c) =>
-        c.id === sub.customerId ? { ...c, outstandingBalance: c.outstandingBalance + total } : c
-      )
-    );
-
-    // Record invoice event in subscription
-    const invoicedEvent: SubscriptionEvent = {
-      id: `ev-${Date.now()}`,
-      subscriptionId: sub.id,
-      eventType: 'INVOICED',
-      timestamp: now.toISOString(),
-      actor: currentUser.name,
-      note: `Generated Invoice ${invoiceNum} for amount $${total.toFixed(2)}`,
-    };
-
-    setSubscriptions((prev) =>
-      prev.map((s) => (s.id === sub.id ? { ...s, events: [invoicedEvent, ...s.events] } : s))
-    );
-
-    showToast(`Recurring invoice ${invoiceNum} generated!`);
-    return newInvoice;
+  const generateRecurringInvoice = async (subscriptionId: string): Promise<Invoice | null> => {
+    try {
+      const res = await fetch(`/api/subscriptions/${subscriptionId}/generate-invoice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actor: currentUser.name }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to generate recurring invoice');
+      }
+      const newInvoice = await res.json();
+      await refreshData();
+      showToast(`Recurring invoice ${newInvoice.invoiceNumber} generated!`);
+      return newInvoice;
+    } catch (err: any) {
+      showToast(err.message, 'error');
+      return null;
+    }
   };
 
   // Invoice actions
-  const addInvoice = (invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber' | 'amountPaid' | 'balanceDue'>) => {
-    const invNumber = generateDocNumber('INV');
-    const newInv: Invoice = {
-      ...invoiceData,
-      id: `inv-${Date.now()}`,
-      invoiceNumber: invNumber,
-      amountPaid: 0,
-      balanceDue: invoiceData.totalAmount,
-      createdAt: new Date().toISOString(),
-    };
+  const addInvoice = async (invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber' | 'amountPaid' | 'balanceDue'>) => {
+    const res = await fetch('/api/invoices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(invoiceData),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showToast(err.error || 'Failed to draft invoice', 'error');
+      throw new Error(err.error || 'Failed to draft invoice');
+    }
+    const newInv = await res.json();
     setInvoices((prev) => [newInv, ...prev]);
-    showToast(`Invoice ${invNumber} drafted.`);
+    showToast(`Invoice ${newInv.invoiceNumber} drafted in database.`);
     return newInv;
   };
 
-  const confirmInvoice = (id: string) => {
-    const inv = invoices.find((i) => i.id === id);
-    if (!inv) return;
-    setInvoices((prev) => prev.map((i) => (i.id === id ? { ...i, status: 'CONFIRMED' } : i)));
-    setCustomers((prev) =>
-      prev.map((c) =>
-        c.id === inv.customerId ? { ...c, outstandingBalance: c.outstandingBalance + inv.balanceDue } : c
-      )
-    );
-    showToast(`Invoice ${inv.invoiceNumber} confirmed.`);
+  const confirmInvoice = async (id: string) => {
+    try {
+      const res = await fetch(`/api/invoices/${id}/confirm`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Confirm failed');
+      }
+      await refreshData();
+      showToast('Invoice confirmed and balance added to customer receivables.');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
-  const cancelInvoice = (id: string, reason?: string) => {
-    const inv = invoices.find((i) => i.id === id);
-    if (!inv) return;
-    setInvoices((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, status: 'CANCELLED', notes: `${i.notes || ''} [Cancelled: ${reason || 'N/A'}]` } : i))
-    );
-    if (inv.status === 'CONFIRMED' || inv.status === 'OVERDUE') {
-      setCustomers((prev) =>
-        prev.map((c) =>
-          c.id === inv.customerId ? { ...c, outstandingBalance: Math.max(0, c.outstandingBalance - inv.balanceDue) } : c
-        )
-      );
+  const cancelInvoice = async (id: string, reason?: string) => {
+    try {
+      const res = await fetch(`/api/invoices/${id}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Cancel failed');
+      }
+      await refreshData();
+      showToast('Invoice cancelled in database.', 'warning');
+    } catch (err: any) {
+      showToast(err.message, 'error');
     }
-    showToast(`Invoice ${inv.invoiceNumber} cancelled.`, 'warning');
   };
 
   // Payment recording & allocation
-  const recordPayment = ({
-    customerId,
-    customerName,
-    amount,
-    method,
-    reference,
-    notes,
-    allocations,
-  }: {
+  const recordPayment = async (paymentData: {
     customerId: string;
     customerName: string;
     amount: number;
@@ -514,123 +541,113 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     reference: string;
     notes?: string;
     allocations: { invoiceId: string; amount: number }[];
-  }): Payment => {
-    const payNumber = generateDocNumber('PAY');
-    const paymentId = `pay-${Date.now()}`;
-
-    const newPayment: Payment = {
-      id: paymentId,
-      paymentNumber: payNumber,
-      date: new Date().toISOString().split('T')[0],
-      customerId,
-      customerName,
-      amount,
-      method,
-      reference,
-      status: 'COMPLETED',
-      notes,
-      createdAt: new Date().toISOString(),
-      allocations: allocations.map((a) => {
-        const inv = invoices.find((i) => i.id === a.invoiceId);
-        return {
-          id: `pa-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-          paymentId,
-          invoiceId: a.invoiceId,
-          invoiceNumber: inv?.invoiceNumber || a.invoiceId,
-          allocatedAmount: a.amount,
-        };
-      }),
-    };
-
-    // Update allocated invoices
-    setInvoices((prev) =>
-      prev.map((inv) => {
-        const allocation = allocations.find((a) => a.invoiceId === inv.id);
-        if (!allocation) return inv;
-        const newAmountPaid = inv.amountPaid + allocation.amount;
-        const newBalanceDue = Math.max(0, inv.totalAmount - newAmountPaid);
-        const newStatus = newBalanceDue <= 0.01 ? 'PAID' : inv.status;
-        return {
-          ...inv,
-          amountPaid: newAmountPaid,
-          balanceDue: newBalanceDue,
-          status: newStatus,
-        };
-      })
-    );
-
-    // Update customer outstanding balance & total spent
-    setCustomers((prev) =>
-      prev.map((c) => {
-        if (c.id !== customerId) return c;
-        return {
-          ...c,
-          totalSpent: c.totalSpent + amount,
-          outstandingBalance: Math.max(0, c.outstandingBalance - amount),
-        };
-      })
-    );
-
-    setPayments((prev) => [newPayment, ...prev]);
-    showToast(`Payment of $${amount.toFixed(2)} recorded and allocated.`);
+  }): Promise<Payment> => {
+    const res = await fetch('/api/payments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(paymentData),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showToast(err.error || 'Failed to record payment', 'error');
+      throw new Error(err.error || 'Failed to record payment');
+    }
+    const newPayment = await res.json();
+    await refreshData();
+    showToast(`Payment of $${paymentData.amount.toFixed(2)} recorded and allocated in database!`);
     return newPayment;
   };
 
   // Tax rule actions
-  const addTaxRule = (ruleData: Omit<TaxRule, 'id'>) => {
-    const newRule: TaxRule = {
-      ...ruleData,
-      id: `tax-${Date.now()}`,
-    };
-    setTaxRules((prev) => [newRule, ...prev]);
-    showToast(`Tax rule "${newRule.name}" added.`);
+  const addTaxRule = async (ruleData: Omit<TaxRule, 'id'>) => {
+    try {
+      const res = await fetch('/api/tax-rules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ruleData),
+      });
+      if (!res.ok) throw new Error('Failed to create tax rule');
+      const newRule = await res.json();
+      setTaxRules((prev) => [newRule, ...prev]);
+      showToast(`Tax rule "${newRule.name}" saved in database.`);
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
-  const updateTaxRule = (id: string, updates: Partial<TaxRule>) => {
-    setTaxRules((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
-    showToast('Tax rule updated.');
+  const updateTaxRule = async (id: string, updates: Partial<TaxRule>) => {
+    try {
+      const res = await fetch(`/api/tax-rules/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('Failed to update tax rule');
+      const updated = await res.json();
+      setTaxRules((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      showToast('Tax rule updated in database.');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
   // Discount actions
-  const addDiscount = (discData: Omit<Discount, 'id' | 'usageCount'>) => {
-    const newDisc: Discount = {
-      ...discData,
-      id: `disc-${Date.now()}`,
-      usageCount: 0,
-    };
-    setDiscounts((prev) => [newDisc, ...prev]);
-    showToast(`Discount code ${newDisc.code} configured.`);
+  const addDiscount = async (discData: Omit<Discount, 'id' | 'usageCount'>) => {
+    try {
+      const res = await fetch('/api/discounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(discData),
+      });
+      if (!res.ok) throw new Error('Failed to create discount');
+      const newDisc = await res.json();
+      setDiscounts((prev) => [newDisc, ...prev]);
+      showToast(`Discount code ${newDisc.code} configured in database.`);
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
-  const updateDiscount = (id: string, updates: Partial<Discount>) => {
-    setDiscounts((prev) => prev.map((d) => (d.id === id ? { ...d, ...updates } : d)));
-    showToast('Discount updated.');
+  const updateDiscount = async (id: string, updates: Partial<Discount>) => {
+    try {
+      const res = await fetch(`/api/discounts/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('Failed to update discount');
+      const updated = await res.json();
+      setDiscounts((prev) => prev.map((d) => (d.id === id ? updated : d)));
+      showToast('Discount updated in database.');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
-  // Calculated Dashboard metrics
+  // Live Calculated Dashboard metrics from state loaded from DB
   const metrics: DashboardMetrics = useMemo(() => {
     const activeSubscriptionsCount = subscriptions.filter((s) => s.status === 'ACTIVE').length;
 
-    // Monthly recurring value
     const totalMonthlyRevenue = subscriptions
       .filter((s) => s.status === 'ACTIVE')
       .reduce((sum, s) => {
-        if (s.billingInterval === 'MONTHLY') return sum + s.totalAmount;
-        if (s.billingInterval === 'YEARLY') return sum + s.totalAmount / 12;
-        if (s.billingInterval === 'WEEKLY') return sum + s.totalAmount * 4.33;
-        if (s.billingInterval === 'DAILY') return sum + s.totalAmount * 30;
-        return sum + s.totalAmount;
+        const val = Number(s.totalAmount) || 0;
+        if (s.billingInterval === 'MONTHLY') return sum + val;
+        if (s.billingInterval === 'YEARLY') return sum + val / 12;
+        if (s.billingInterval === 'WEEKLY') return sum + val * 4.33;
+        if (s.billingInterval === 'DAILY') return sum + val * 30;
+        return sum + val;
       }, 0);
 
-    const cashReceivedThisMonth = payments.reduce((sum, p) => sum + p.amount, 0);
-    const invoicedThisMonth = invoices.reduce((sum, i) => sum + i.totalAmount, 0);
+    const cashReceivedThisMonth = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const invoicedThisMonth = invoices.reduce((sum, i) => sum + (Number(i.totalAmount) || 0), 0);
     const totalOutstandingBalance = invoices
       .filter((i) => i.status === 'CONFIRMED' || i.status === 'OVERDUE')
-      .reduce((sum, i) => sum + i.balanceDue, 0);
+      .reduce((sum, i) => sum + (Number(i.balanceDue) || 0), 0);
 
     const overdueInvoices = invoices.filter((i) => i.status === 'OVERDUE');
     const overdueInvoicesCount = overdueInvoices.length;
-    const overdueAmount = overdueInvoices.reduce((sum, i) => sum + i.balanceDue, 0);
+    const overdueAmount = overdueInvoices.reduce((sum, i) => sum + (Number(i.balanceDue) || 0), 0);
 
     return {
       activeSubscriptionsCount,
@@ -685,6 +702,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addDiscount,
         updateDiscount,
         metrics,
+        isLoading,
+        refreshData,
         toasts,
         showToast,
         removeToast,

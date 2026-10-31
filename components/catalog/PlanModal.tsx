@@ -150,7 +150,7 @@ export function PlanModal({ isOpen, onClose, planToEdit }: PlanModalProps) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Key benefits, target customer tier, billing terms..."
-            className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+            className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
           />
         </div>
 
@@ -201,7 +201,7 @@ export function PlanModal({ isOpen, onClose, planToEdit }: PlanModalProps) {
         {/* Section 2.3 & 5.5: Plan Lifecycle Permission Toggles */}
         <div className="border-t border-slate-200 pt-4 space-y-3">
           <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-            <ShieldCheck className="h-4 w-4 text-indigo-600" />
+            <ShieldCheck className="h-4 w-4 text-brand" />
             Plan Lifecycle Rules & Enforcement
           </h4>
           <p className="text-xs text-slate-500">
@@ -214,7 +214,7 @@ export function PlanModal({ isOpen, onClose, planToEdit }: PlanModalProps) {
                 type="checkbox"
                 checked={allowPause}
                 onChange={(e) => setAllowPause(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand"
               />
               <div>
                 <p className="text-xs font-semibold text-slate-900">Allow Pause</p>
@@ -229,7 +229,7 @@ export function PlanModal({ isOpen, onClose, planToEdit }: PlanModalProps) {
                 type="checkbox"
                 checked={allowEarlyClose}
                 onChange={(e) => setAllowEarlyClose(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand"
               />
               <div>
                 <p className="text-xs font-semibold text-slate-900">Allow Early Close</p>
@@ -244,7 +244,7 @@ export function PlanModal({ isOpen, onClose, planToEdit }: PlanModalProps) {
                 type="checkbox"
                 checked={allowRenewal}
                 onChange={(e) => setAllowRenewal(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand"
               />
               <div>
                 <p className="text-xs font-semibold text-slate-900">Allow Renewal</p>
@@ -259,7 +259,7 @@ export function PlanModal({ isOpen, onClose, planToEdit }: PlanModalProps) {
                 type="checkbox"
                 checked={autoClose}
                 onChange={(e) => setAutoClose(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand"
               />
               <div>
                 <p className="text-xs font-semibold text-slate-900">Auto Close on End Date</p>

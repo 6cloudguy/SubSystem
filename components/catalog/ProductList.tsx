@@ -103,7 +103,7 @@ export function ProductList() {
                 <TableCell>
                   {prod.variants.length > 0 ? (
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+                      <span className="text-xs bg-brand-50 text-brand-700 px-2 py-0.5 rounded-full font-medium">
                         {prod.variants.length} variant{prod.variants.length > 1 ? 's' : ''}
                       </span>
                     </div>

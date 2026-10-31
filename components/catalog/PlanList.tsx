@@ -74,7 +74,7 @@ export function PlanList() {
                 )}
                 <div className="flex justify-between">
                   <span>Active Subscribers:</span>
-                  <span className="font-semibold text-indigo-600">
+                  <span className="font-semibold text-brand">
                     {plan.subscribersCount || 0} customer(s)
                   </span>
                 </div>

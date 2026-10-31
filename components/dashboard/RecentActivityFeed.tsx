@@ -28,12 +28,12 @@ export function RecentActivityFeed() {
   }[] = [];
 
   subscriptions.forEach((sub) => {
-    sub.events.forEach((ev) => {
+    sub.events?.forEach((ev) => {
       let icon = <CheckCircle2 className="h-4 w-4 text-emerald-600" />;
       if (ev.eventType === 'PAUSED') icon = <PauseCircle className="h-4 w-4 text-amber-600" />;
       if (ev.eventType === 'RESUMED') icon = <PlayCircle className="h-4 w-4 text-sky-600" />;
       if (ev.eventType === 'CLOSED') icon = <XCircle className="h-4 w-4 text-rose-600" />;
-      if (ev.eventType === 'INVOICED') icon = <FileText className="h-4 w-4 text-indigo-600" />;
+      if (ev.eventType === 'INVOICED') icon = <FileText className="h-4 w-4 text-brand" />;
 
       activities.push({
         id: ev.id,
@@ -64,8 +64,8 @@ export function RecentActivityFeed() {
     <Card className="h-full">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-indigo-50 border border-indigo-100">
-            <History className="h-4 w-4 text-indigo-600" />
+          <div className="p-1.5 rounded-lg bg-brand-50 border border-brand-200">
+            <History className="h-4 w-4 text-brand" />
           </div>
           <div>
             <CardTitle>Lifecycle & Audit Feed</CardTitle>

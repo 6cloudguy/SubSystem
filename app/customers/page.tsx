@@ -11,7 +11,7 @@ export default function CustomersPage() {
       <div className="space-y-6">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600">
+            <div className="p-2 rounded-xl bg-brand-50 border border-brand-200 text-brand">
               <Users2 className="h-5 w-5" />
             </div>
             <div>

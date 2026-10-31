@@ -191,7 +191,7 @@ export function ProductModal({ isOpen, onClose, productToEdit }: ProductModalPro
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Usage terms, scope, inclusions..."
-            className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+            className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
           />
         </div>
 
@@ -200,7 +200,7 @@ export function ProductModal({ isOpen, onClose, productToEdit }: ProductModalPro
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-                <Tag className="h-4 w-4 text-indigo-600" />
+                <Tag className="h-4 w-4 text-brand" />
                 Product Variants ({variants.length})
               </h4>
               <p className="text-xs text-slate-500">

@@ -15,6 +15,7 @@ import { Card } from '@/components/ui/Card';
 
 export function OverviewKpiCards() {
   const { metrics } = useApp();
+  const currentMonth = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
   const kpis = [
     {
@@ -22,8 +23,8 @@ export function OverviewKpiCards() {
       value: metrics.activeSubscriptionsCount,
       subtext: `Across ${metrics.customersCount} active accounts`,
       icon: RefreshCw,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50 border-indigo-100',
+      color: 'text-brand',
+      bgColor: 'bg-brand-50 border-brand-200',
     },
     {
       label: 'MRR Value (Active)',
@@ -34,7 +35,7 @@ export function OverviewKpiCards() {
       bgColor: 'bg-emerald-50 border-emerald-100',
     },
     {
-      label: 'Invoiced (Oct 2026)',
+      label: `Invoiced (${currentMonth})`,
       value: formatCurrency(metrics.invoicedThisMonth),
       subtext: 'Total billed this cycle',
       icon: Receipt,
@@ -42,7 +43,7 @@ export function OverviewKpiCards() {
       bgColor: 'bg-sky-50 border-sky-100',
     },
     {
-      label: 'Cash Received (Oct 2026)',
+      label: `Cash Received (${currentMonth})`,
       value: formatCurrency(metrics.cashReceivedThisMonth),
       subtext: 'Direct settled payments',
       icon: CreditCard,
@@ -62,8 +63,8 @@ export function OverviewKpiCards() {
       value: formatCurrency(metrics.overdueAmount),
       subtext: `${metrics.overdueInvoicesCount} invoices require follow-up`,
       icon: AlertTriangle,
-      color: metrics.overdueInvoicesCount > 0 ? 'text-rose-600' : 'text-slate-500',
-      bgColor: metrics.overdueInvoicesCount > 0 ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-100',
+      color: metrics.overdueInvoicesCount > 0 ? 'text-rose-600' : 'text-sub-muted',
+      bgColor: metrics.overdueInvoicesCount > 0 ? 'bg-rose-50 border-rose-200' : 'bg-surface-subtle border-sub-border',
       highlight: metrics.overdueInvoicesCount > 0,
     },
   ];
@@ -75,20 +76,20 @@ export function OverviewKpiCards() {
         return (
           <Card
             key={idx}
-            className={`p-4 border transition-all hover:shadow-md ${
+            className={`p-4 border transition-all hover:shadow-medium ${
               kpi.highlight ? 'ring-2 ring-rose-500/20' : ''
             }`}
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-sub-muted">
                 {kpi.label}
               </span>
               <div className={`p-2 rounded-xl border ${kpi.bgColor}`}>
                 <Icon className={`h-4 w-4 ${kpi.color}`} />
               </div>
             </div>
-            <div className="text-xl font-bold text-slate-900 tracking-tight">{kpi.value}</div>
-            <p className="mt-1 text-xs text-slate-500 truncate">{kpi.subtext}</p>
+            <div className="text-xl font-bold text-sub-base tracking-tight">{kpi.value}</div>
+            <p className="mt-1 text-xs text-sub-muted truncate">{kpi.subtext}</p>
           </Card>
         );
       })}

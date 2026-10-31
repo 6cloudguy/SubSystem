@@ -95,7 +95,7 @@ export function CustomerList() {
                       {cust.name.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-900 text-sm hover:text-indigo-600 transition-colors">
+                      <p className="font-semibold text-slate-900 text-sm hover:text-brand transition-colors">
                         {cust.name}
                       </p>
                       <p className="text-xs text-slate-500">{cust.company}</p>
@@ -139,7 +139,7 @@ export function CustomerList() {
                         setEditingCustomer(cust);
                         setIsModalOpen(true);
                       }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-brand hover:bg-slate-100"
                       title="Edit Customer"
                     >
                       <Edit2 className="h-4 w-4" />
