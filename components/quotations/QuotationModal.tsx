@@ -28,10 +28,10 @@ interface DraftLine {
 }
 
 export function QuotationModal({ isOpen, onClose, preselectedCustomerId }: QuotationModalProps) {
-  const { customers, products, addQuotation } = useApp();
+  const { customers, products, taxRules, addQuotation } = useApp();
 
   const [customerId, setCustomerId] = useState(preselectedCustomerId || (customers[0]?.id || ''));
-  const [templateName, setTemplateName] = useState('Enterprise Proposal');
+  const [templateName, setTemplateName] = useState('');
   const [validityDate, setValidityDate] = useState(
     new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]
   );
@@ -44,7 +44,7 @@ export function QuotationModal({ isOpen, onClose, preselectedCustomerId }: Quota
       description: products[0]?.name || '',
       quantity: 1,
       unitPrice: products[0]?.salesPrice || 0,
-      taxRate: 8.25,
+      taxRate: taxRules[0]?.rate ?? 0,
       discountAmount: 0,
       lineTotal: products[0]?.salesPrice || 0,
     },

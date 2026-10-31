@@ -91,7 +91,4 @@ export function verifyPasswordSync(password: string, hash: string): boolean {
   }
 }
 
-// Default initial passwords for seed accounts
-export const DEFAULT_ADMIN_PASSWORD = 'Admin@BrightLoop2026!';
-export const DEFAULT_STAFF_PASSWORD = 'Staff@BrightLoop2026!';
-export const DEFAULT_CUSTOMER_PASSWORD = 'Customer@BrightLoop2026!';
+

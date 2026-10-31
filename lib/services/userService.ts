@@ -3,9 +3,6 @@ import {
   verifyPassword,
   hashPassword,
   validatePasswordPolicy,
-  DEFAULT_ADMIN_PASSWORD,
-  DEFAULT_STAFF_PASSWORD,
-  DEFAULT_CUSTOMER_PASSWORD,
 } from '@/lib/auth/password';
 import { User, UserRole, UserStatus } from '@/lib/types';
 
@@ -51,15 +48,6 @@ export function toSafeUser(user: any): SafeUser {
 }
 
 /**
- * Determine default password for initial seed accounts
- */
-function getDefaultPasswordForRole(role?: string): string {
-  if (role === 'ADMIN') return DEFAULT_ADMIN_PASSWORD;
-  if (role === 'CUSTOMER') return DEFAULT_CUSTOMER_PASSWORD;
-  return DEFAULT_STAFF_PASSWORD;
-}
-
-/**
  * Find user by email in PostgreSQL
  */
 export async function findUserByEmail(email: string) {
@@ -78,8 +66,7 @@ export async function findUserByEmail(email: string) {
 }
 
 /**
- * Authenticate user credentials with bcrypt password verification
- * If the user's passwordHash in PostgreSQL is empty/unhashed, automatically hashes and saves it!
+ * Authenticate user credentials with bcrypt password verification against PostgreSQL
  */
 export async function authenticateUser(email: string, passwordPlain: string) {
   const normalized = email.toLowerCase().trim();
@@ -95,37 +82,15 @@ export async function authenticateUser(email: string, passwordPlain: string) {
 
   let isMatch = false;
 
-  // Case 1: Has a stored bcrypt password hash
   if (user.passwordHash && user.passwordHash.startsWith('$2')) {
     isMatch = await verifyPassword(passwordPlain, user.passwordHash);
-  } else {
-    // Case 2: Database has blank or unmigrated hash - check if matches expected default password
-    const defaultExpected = getDefaultPasswordForRole(user.role);
-    if (defaultExpected && passwordPlain === defaultExpected) {
-      isMatch = true;
-    }
   }
 
   if (!isMatch) {
     return { success: false, error: 'Invalid email or password.' };
   }
 
-  // If user is from PostgreSQL and needs their password hash saved / updated:
-  if (fromDb && (!user.passwordHash || !user.passwordHash.startsWith('$2'))) {
-    try {
-      const newHash = await hashPassword(passwordPlain);
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          passwordHash: newHash,
-          lastActive: new Date(),
-        },
-      });
-      console.log(`[userService] Updated password hash in database for user ${user.email}`);
-    } catch (e) {
-      console.error('[userService] Failed to update password hash in DB:', e);
-    }
-  } else if (fromDb) {
+  if (fromDb) {
     // Update lastActive timestamp
     try {
       await prisma.user.update({
