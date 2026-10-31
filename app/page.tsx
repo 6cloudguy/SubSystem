@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Sparkles,
   ArrowRight,
@@ -49,16 +50,15 @@ function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div
-            className="h-9 w-9 rounded-xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-105"
-            style={{ background: `linear-gradient(135deg, ${theme.orange}, ${theme.orangeHover})` }}
-          >
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <span className="font-bold text-lg tracking-tight" style={{ color: theme.black }}>
-            BrightLoop
-          </span>
+        <Link href="/" className="flex items-center gap-2 group">
+          <Image
+            src="/logo.png"
+            alt="BrightLoop Logo"
+            width={180}
+            height={86}
+            priority
+            className="h-11 sm:h-12 w-auto object-contain transition-transform group-hover:scale-105"
+          />
         </Link>
 
         {/* Desktop Links */}
@@ -106,6 +106,15 @@ function Navbar() {
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-3">
+          <div className="pb-2 border-b border-gray-100">
+            <Image
+              src="/logo.png"
+              alt="BrightLoop Logo"
+              width={140}
+              height={42}
+              className="h-8 w-auto object-contain mix-blend-multiply"
+            />
+          </div>
           {navLinks.map((link) => (
             <a
               key={link.label}
@@ -152,17 +161,33 @@ function HeroSection() {
       </div>
 
       <div className="max-w-6xl mx-auto relative">
-        <div className="max-w-3xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-8 border"
-            style={{ backgroundColor: theme.orangeLight, color: theme.orange, borderColor: '#FFD6B3' }}>
-            <Zap className="h-3.5 w-3.5" />
-            Subscription Management, Reimagined
+        <div className="max-w-3xl mx-auto">
+          {/* Big Noticeable Brand Logo - Above the Badge */}
+          <div className="flex items-center justify-center sm:justify-start mb-6">
+            <Image
+              src="/logo.png"
+              alt="BrightLoop Logo"
+              width={450}
+              height={215}
+              priority
+              className="h-20 sm:h-28 md:h-32 w-auto object-contain drop-shadow-sm transition-transform duration-300 hover:scale-[1.02]"
+            />
+          </div>
+
+          {/* Badge: Subscription Management, Reimagined */}
+          <div className="flex items-center justify-center sm:justify-start mb-6">
+            <div
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold border shadow-2xs"
+              style={{ backgroundColor: theme.orangeLight, color: theme.orange, borderColor: '#FFD6B3' }}
+            >
+              <Zap className="h-3.5 w-3.5" />
+              Subscription Management, Reimagined
+            </div>
           </div>
 
           {/* Headline */}
           <h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-6"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-6 text-center sm:text-left"
             style={{ color: theme.black }}
           >
             One platform for{' '}
@@ -171,13 +196,13 @@ function HeroSection() {
           </h1>
 
           {/* Sub-headline */}
-          <p className="text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl mx-auto" style={{ color: theme.muted }}>
+          <p className="text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl text-center sm:text-left" style={{ color: theme.muted }}>
             BrightLoop centralizes your entire subscription lifecycle — from quotations and billing to payment
             reconciliation and reporting — so your team never misses a renewal.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4">
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-base shadow-xl transition-all hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
@@ -197,7 +222,7 @@ function HeroSection() {
           </div>
 
           {/* Social Proof */}
-          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6 text-sm" style={{ color: theme.muted }}>
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-6 text-sm" style={{ color: theme.muted }}>
             <div className="flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -225,9 +250,16 @@ function HeroSection() {
                 <div className="w-3 h-3 rounded-full bg-green-400" />
               </div>
               <div className="flex-1 mx-4">
-                <div className="max-w-md mx-auto h-6 rounded-md flex items-center justify-center text-xs font-medium"
+                <div className="max-w-md mx-auto h-7 rounded-md flex items-center justify-center gap-2 px-3 text-xs font-medium"
                   style={{ backgroundColor: theme.white, color: theme.muted, border: `1px solid ${theme.border}` }}>
-                  app.brightloop.io/dashboard
+                  <Image
+                    src="/logo.png"
+                    alt="BrightLoop"
+                    width={60}
+                    height={18}
+                    className="h-3.5 w-auto object-contain mix-blend-multiply"
+                  />
+                  <span>app.brightloop.io/dashboard</span>
                 </div>
               </div>
             </div>
@@ -340,11 +372,20 @@ function FeaturesSection() {
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 border"
-            style={{ backgroundColor: theme.orangeLight, color: theme.orange, borderColor: '#FFD6B3' }}
-          >
-            FEATURES
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Image
+              src="/logo.png"
+              alt="BrightLoop Features"
+              width={140}
+              height={67}
+              className="h-8 sm:h-9 w-auto object-contain"
+            />
+            <span
+              className="px-3 py-1 rounded-full text-xs font-semibold border"
+              style={{ backgroundColor: theme.orangeLight, color: theme.orange, borderColor: '#FFD6B3' }}
+            >
+              FEATURES
+            </span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4" style={{ color: theme.black }}>
             Everything you need to manage subscriptions
@@ -420,11 +461,20 @@ function HowItWorksSection() {
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 border"
-            style={{ backgroundColor: theme.orangeLight, color: theme.orange, borderColor: '#FFD6B3' }}
-          >
-            HOW IT WORKS
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Image
+              src="/logo.png"
+              alt="BrightLoop Workflow"
+              width={140}
+              height={67}
+              className="h-8 sm:h-9 w-auto object-contain"
+            />
+            <span
+              className="px-3 py-1 rounded-full text-xs font-semibold border"
+              style={{ backgroundColor: theme.orangeLight, color: theme.orange, borderColor: '#FFD6B3' }}
+            >
+              HOW IT WORKS
+            </span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4" style={{ color: theme.black }}>
             From setup to insights in four steps
@@ -489,13 +539,24 @@ function CtaSection() {
           />
 
           <div className="relative">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-4">
+            <div className="flex items-center justify-center sm:justify-start mb-6">
+              <div className="inline-flex items-center bg-white px-5 py-2.5 rounded-2xl shadow-xl">
+                <Image
+                  src="/logo.png"
+                  alt="BrightLoop Logo"
+                  width={180}
+                  height={86}
+                  className="h-10 sm:h-12 w-auto object-contain"
+                />
+              </div>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-4 text-center sm:text-left">
               Ready to streamline your subscriptions?
             </h2>
-            <p className="text-base sm:text-lg mb-8 max-w-xl mx-auto" style={{ color: '#9CA3AF' }}>
+            <p className="text-base sm:text-lg mb-8 max-w-xl text-center sm:text-left" style={{ color: '#9CA3AF' }}>
               Join hundreds of businesses using BrightLoop to manage their entire subscription lifecycle. Start your free 14-day trial today.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4">
               <Link
                 href="/dashboard"
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-white font-semibold text-base shadow-xl transition-all hover:shadow-2xl hover:scale-[1.02]"
@@ -533,15 +594,13 @@ function Footer() {
           {/* Brand col */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2.5 mb-4">
-              <div
-                className="h-8 w-8 rounded-lg flex items-center justify-center text-white"
-                style={{ background: `linear-gradient(135deg, ${theme.orange}, ${theme.orangeHover})` }}
-              >
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <span className="font-bold text-base tracking-tight" style={{ color: theme.black }}>
-                BrightLoop
-              </span>
+              <Image
+                src="/logo.png"
+                alt="BrightLoop Logo"
+                width={180}
+                height={86}
+                className="h-11 sm:h-12 w-auto object-contain"
+              />
             </div>
             <p className="text-sm leading-relaxed mb-4" style={{ color: theme.muted }}>
               Subscription management, simplified. Centralize billing, invoicing, and payments for your entire team.
