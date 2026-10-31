@@ -13,6 +13,7 @@ import {
   ChevronDown,
   User,
   Settings,
+  LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -203,6 +204,15 @@ export function Header() {
                   <Settings className="h-4 w-4 text-sub-muted" />
                   <span>Preferences & Taxes</span>
                 </Link>
+                <div className="border-t border-sub-border/60 my-1" />
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-rose-50 text-rose-600 transition-colors text-left"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign Out</span>
+                </button>
               </div>
             </div>
           )}

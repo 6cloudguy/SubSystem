@@ -88,9 +88,9 @@ interface AppContextType {
 }
 
 const defaultUser: User = {
-  id: 'user-default',
-  name: 'Sarah Connor',
-  email: 'sarah.admin@brightloop.io',
+  id: '',
+  name: 'Operations Staff',
+  email: '',
   role: 'ADMIN',
   status: 'ACTIVE',
   createdAt: new Date().toISOString(),
@@ -189,11 +189,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
 
       setUsers(usersRes);
-      if (usersRes.length > 0) {
-        setCurrentUser((prev) => {
-          const match = usersRes.find((u: User) => u.id === prev.id);
-          return match || usersRes[0];
-        });
+      try {
+        const authRes = await fetch('/api/auth/me');
+        if (authRes.ok) {
+          const authData = await authRes.json();
+          if (authData.authenticated && authData.user) {
+            setCurrentUser(authData.user);
+          } else if (usersRes.length > 0) {
+            setCurrentUser((prev) => {
+              const match = usersRes.find((u: User) => u.id === prev.id);
+              return match || usersRes[0];
+            });
+          }
+        } else if (usersRes.length > 0) {
+          setCurrentUser((prev) => {
+            const match = usersRes.find((u: User) => u.id === prev.id);
+            return match || usersRes[0];
+          });
+        }
+      } catch {
+        if (usersRes.length > 0) {
+          setCurrentUser((prev) => {
+            const match = usersRes.find((u: User) => u.id === prev.id);
+            return match || usersRes[0];
+          });
+        }
       }
       setCustomers(customersRes);
       setProducts(productsRes);

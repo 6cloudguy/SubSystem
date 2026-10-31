@@ -3,56 +3,7 @@ import {
   verifyPassword,
   hashPassword,
   validatePasswordPolicy,
-  DEFAULT_ADMIN_PASSWORD,
-  DEFAULT_STAFF_PASSWORD,
-  DEFAULT_CUSTOMER_PASSWORD,
-  DEFAULT_ADMIN_HASH,
-  DEFAULT_STAFF_HASH,
-  DEFAULT_CUSTOMER_HASH,
 } from '@/lib/auth/password';
-// Embedded fallback users (used when DB is unreachable)
-const fallbackUsers = [
-  {
-    id: 'user-1',
-    name: 'Sarah Connor',
-    email: 'sarah.admin@brightloop.io',
-    role: 'ADMIN' as const,
-    status: 'ACTIVE' as const,
-    assignedCustomersCount: 12,
-    createdAt: '2026-01-15T09:00:00Z',
-    passwordHash: '$2b$10$7hHVnWTrqYiXWsfb8yN44OasO.TNSHXigqVyVxjHIA4rL84.crUcS',
-  },
-  {
-    id: 'user-2',
-    name: 'Alex Rivera',
-    email: 'alex.rivera@brightloop.io',
-    role: 'INTERNAL_STAFF' as const,
-    status: 'ACTIVE' as const,
-    assignedCustomersCount: 8,
-    createdAt: '2026-02-01T10:30:00Z',
-    passwordHash: '$2b$10$RT/0M1zc1HoHp8mMRhxzIelz16JrHg5zaI9qIi5OZkeySPWPWDBU.',
-  },
-  {
-    id: 'user-3',
-    name: 'Jordan Lee',
-    email: 'jordan.lee@brightloop.io',
-    role: 'INTERNAL_STAFF' as const,
-    status: 'ACTIVE' as const,
-    assignedCustomersCount: 6,
-    createdAt: '2026-03-10T14:15:00Z',
-    passwordHash: '$2b$10$RT/0M1zc1HoHp8mMRhxzIelz16JrHg5zaI9qIi5OZkeySPWPWDBU.',
-  },
-  {
-    id: 'user-4',
-    name: 'Marcus Vance',
-    email: 'marcus.v@brightloop.io',
-    role: 'INTERNAL_STAFF' as const,
-    status: 'INACTIVE' as const,
-    assignedCustomersCount: 0,
-    createdAt: '2026-01-20T11:00:00Z',
-    passwordHash: '$2b$10$RT/0M1zc1HoHp8mMRhxzIelz16JrHg5zaI9qIi5OZkeySPWPWDBU.',
-  },
-];
 import { User, UserRole, UserStatus } from '@/lib/types';
 
 export interface SafeUser {
@@ -97,21 +48,7 @@ export function toSafeUser(user: any): SafeUser {
 }
 
 /**
- * Determine default password for initial seed accounts
- */
-function getDefaultPasswordForEmail(email: string): string | null {
-  const normalized = email.toLowerCase().trim();
-  if (normalized.includes('admin') || normalized === 'sarah.admin@brightloop.io') {
-    return DEFAULT_ADMIN_PASSWORD;
-  }
-  if (normalized.includes('customer')) {
-    return DEFAULT_CUSTOMER_PASSWORD;
-  }
-  return DEFAULT_STAFF_PASSWORD;
-}
-
-/**
- * Find user by email in PostgreSQL or fallback
+ * Find user by email in PostgreSQL
  */
 export async function findUserByEmail(email: string) {
   const normalized = email.toLowerCase().trim();
@@ -122,28 +59,14 @@ export async function findUserByEmail(email: string) {
     });
     if (dbUser) return { user: dbUser, fromDb: true };
   } catch (error) {
-    // Database unreachable or offline - fall back to mock data
-  }
-
-  // Fallback to fallbackUsers
-  const mockUser = fallbackUsers.find((u) => u.email.toLowerCase() === normalized);
-  if (mockUser) {
-    return {
-      user: {
-        ...mockUser,
-        passwordHash:
-          mockUser.role === 'ADMIN' ? DEFAULT_ADMIN_HASH : DEFAULT_STAFF_HASH,
-      },
-      fromDb: false,
-    };
+    console.error('[userService] Database query error finding user:', error);
   }
 
   return { user: null, fromDb: false };
 }
 
 /**
- * Authenticate user credentials with bcrypt password verification
- * If the user's passwordHash in PostgreSQL is empty/unhashed, automatically hashes and saves it!
+ * Authenticate user credentials with bcrypt password verification against PostgreSQL
  */
 export async function authenticateUser(email: string, passwordPlain: string) {
   const normalized = email.toLowerCase().trim();
@@ -159,37 +82,15 @@ export async function authenticateUser(email: string, passwordPlain: string) {
 
   let isMatch = false;
 
-  // Case 1: Has a stored bcrypt password hash
   if (user.passwordHash && user.passwordHash.startsWith('$2')) {
     isMatch = await verifyPassword(passwordPlain, user.passwordHash);
-  } else {
-    // Case 2: Database has blank or unmigrated hash - check if matches expected default password
-    const defaultExpected = getDefaultPasswordForEmail(user.email);
-    if (defaultExpected && passwordPlain === defaultExpected) {
-      isMatch = true;
-    }
   }
 
   if (!isMatch) {
     return { success: false, error: 'Invalid email or password.' };
   }
 
-  // If user is from PostgreSQL and needs their password hash saved / updated:
-  if (fromDb && (!user.passwordHash || !user.passwordHash.startsWith('$2'))) {
-    try {
-      const newHash = await hashPassword(passwordPlain);
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          passwordHash: newHash,
-          lastActive: new Date(),
-        },
-      });
-      console.log(`[userService] Updated password hash in database for user ${user.email}`);
-    } catch (e) {
-      console.error('[userService] Failed to update password hash in DB:', e);
-    }
-  } else if (fromDb) {
+  if (fromDb) {
     // Update lastActive timestamp
     try {
       await prisma.user.update({
@@ -266,7 +167,7 @@ export async function updateUserPassword(email: string, newPasswordPlain: string
   }
 
   const normalized = email.toLowerCase().trim();
-  const { user, fromDb } = await findUserByEmail(normalized);
+  const { user } = await findUserByEmail(normalized);
 
   if (!user) {
     return { success: false, error: 'No account found with this email address.' };
@@ -274,20 +175,16 @@ export async function updateUserPassword(email: string, newPasswordPlain: string
 
   const newHash = await hashPassword(newPasswordPlain);
 
-  if (fromDb) {
-    try {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          passwordHash: newHash,
-          updatedAt: new Date(),
-        },
-      });
-      return { success: true, message: 'Password has been securely updated in the database.' };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Database error updating password.' };
-    }
+  try {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: newHash,
+        updatedAt: new Date(),
+      },
+    });
+    return { success: true, message: 'Password has been securely updated in the database.' };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Database error updating password.' };
   }
-
-  return { success: true, message: 'Password updated successfully (mock mode).' };
 }

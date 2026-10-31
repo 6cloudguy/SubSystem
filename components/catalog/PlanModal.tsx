@@ -20,7 +20,7 @@ export function PlanModal({ isOpen, onClose, planToEdit }: PlanModalProps) {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [price, setPrice] = useState<number>(499);
+  const [price, setPrice] = useState<number>(0);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('MONTHLY');
   const [minQuantity, setMinQuantity] = useState<number>(1);
   const [startDate, setStartDate] = useState('');
@@ -48,7 +48,7 @@ export function PlanModal({ isOpen, onClose, planToEdit }: PlanModalProps) {
     } else {
       setName('');
       setDescription('');
-      setPrice(499);
+      setPrice(0);
       setBillingInterval('MONTHLY');
       setMinQuantity(1);
       setStartDate('');

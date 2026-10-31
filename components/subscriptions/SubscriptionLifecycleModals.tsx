@@ -15,7 +15,7 @@ interface PauseModalProps {
 
 export function PauseSubscriptionModal({ subscription, isOpen, onClose }: PauseModalProps) {
   const { pauseSubscription } = useApp();
-  const [reason, setReason] = useState('Customer temporary freeze request');
+  const [reason, setReason] = useState('');
   const [expectedResumeDate, setExpectedResumeDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -132,7 +132,7 @@ interface CloseModalProps {
 
 export function CloseSubscriptionModal({ subscription, isOpen, onClose }: CloseModalProps) {
   const { closeSubscription } = useApp();
-  const [reason, setReason] = useState('Contract term concluded');
+  const [reason, setReason] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   if (!subscription) return null;

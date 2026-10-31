@@ -142,7 +142,7 @@ export function StaffManager() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Jordan Lee"
+            placeholder="Staff Full Name"
           />
           <Input
             label="Corporate Email Address"
@@ -150,7 +150,7 @@ export function StaffManager() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="jordan.lee@brightloop.io"
+            placeholder="name@company.com"
           />
           <Select
             label="Operational Role"

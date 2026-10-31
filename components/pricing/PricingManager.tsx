@@ -19,7 +19,7 @@ export function PricingManager() {
   // Tax Rule Modal state
   const [isTaxModalOpen, setIsTaxModalOpen] = useState(false);
   const [taxName, setTaxName] = useState('');
-  const [taxRate, setTaxRate] = useState<number>(8.25);
+  const [taxRate, setTaxRate] = useState<number>(0);
   const [taxApplicability, setTaxApplicability] = useState<'ALL' | 'PRODUCTS' | 'SERVICES'>('ALL');
 
   // Discount Modal state
@@ -27,9 +27,9 @@ export function PricingManager() {
   const [discCode, setDiscCode] = useState('');
   const [discName, setDiscName] = useState('');
   const [discType, setDiscType] = useState<'PERCENTAGE' | 'FIXED'>('PERCENTAGE');
-  const [discValue, setDiscValue] = useState<number>(10);
+  const [discValue, setDiscValue] = useState<number>(0);
   const [discMinAmount, setDiscMinAmount] = useState<number>(0);
-  const [discUsageLimit, setDiscUsageLimit] = useState<number>(100);
+  const [discUsageLimit, setDiscUsageLimit] = useState<number>(0);
   const [discScope, setDiscScope] = useState<'ALL' | 'SUBSCRIPTIONS' | 'PLANS'>('ALL');
 
   const handleCreateTax = async (e: React.FormEvent) => {
