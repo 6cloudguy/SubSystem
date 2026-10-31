@@ -1,0 +1,131 @@
+# Web App Theme Configuration
+
+# Primary: White | Secondary/Sub: Orange | Accent/Sub-Sub: Black
+
+
+
+[Metadata]
+
+ThemeName = Crisp Minimal Orange
+
+Version = 1.0.0
+
+Author = UI Design System Generator
+
+Description = Clean, modern minimalist theme optimized for high readability, featuring crisp white surfaces, vibrant orange accents, and stark black details.
+
+
+
+[Color Palette]
+
+# Primary Colors (Dominant Backgrounds & Surfaces)
+
+primary.base = #FFFFFF
+
+primary.hover = #F8F9FA
+
+primary.subtle = #F1F3F5
+
+primary.contrast = #000000
+
+
+
+# Sub / Secondary Colors (Interactive Elements, CTAs, Highlights)
+
+secondary.base = #FF6B00
+
+secondary.hover = #E56000
+
+secondary.active = #CC5500
+
+secondary.light = #FFF0E6
+
+secondary.contrast = #FFFFFF
+
+
+
+# Very Sub / Accent / Neutral Dark (Text, Borders, High-contrast elements)
+
+sub.base = #121212
+
+sub.muted = #6C757D
+
+sub.border = #DEE2E6
+
+sub.dark = #000000
+
+
+
+[Typography]
+
+font.family.primary = "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
+
+font.family.mono = "Fira Code", monospace
+
+font.weight.light = 300
+
+font.weight.regular = 400
+
+font.weight.medium = 500
+
+font.weight.bold = 700
+
+
+
+[Spacing & Layout]
+
+container.max-width = 1200px
+
+border-radius.small = 4px
+
+border-radius.medium = 8px
+
+border-radius.large = 12px
+
+border-radius.pill = 9999px
+
+
+
+[Shadows]
+
+shadow.subtle = 0 1px 3px rgba(0, 0, 0, 0.05)
+
+shadow.medium = 0 4px 6px rgba(0, 0, 0, 0.07)
+
+shadow.elevated = 0 10px 25px rgba(0, 0, 0, 0.1)
+
+
+
+[Component Guidelines]
+
+# Buttons
+
+button.primary.bg = @secondary.base
+
+button.primary.text = @secondary.contrast
+
+button.secondary.bg = @primary.base
+
+button.secondary.text = @sub.base
+
+button.secondary.border = @sub.border
+
+
+
+# Cards & Containers
+
+card.bg = @primary.base
+
+card.border = @sub.border
+
+card.shadow = @shadow.subtle
+
+
+
+# Navigation
+
+nav.bg = @primary.base
+
+nav.text = @sub.base
+
+nav.active-indicator = @secondary.base
