@@ -1,9 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateUser } from '@/lib/services/userService';
 import { createSessionToken, SESSION_COOKIE_NAME, SESSION_EXPIRY_SECONDS } from '@/lib/auth/session';
+import { checkRateLimit, resetRateLimit } from '@/lib/auth/rateLimit';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'local_client';
+    
+    // Rate limit: 5 login attempts per minute per IP
+    const rateCheck = checkRateLimit(`login:${ip}`, 5, 60);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: `Too many login attempts. Please wait ${rateCheck.retryAfterSeconds} seconds before trying again.`,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateCheck.retryAfterSeconds),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
     const { email, password, rememberMe } = body;
 
@@ -22,6 +41,9 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Reset rate limit upon successful login
+    resetRateLimit(`login:${ip}`);
 
     const user = authResult.user;
     const sessionToken = createSessionToken({
