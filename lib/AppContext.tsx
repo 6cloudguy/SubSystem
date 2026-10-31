@@ -80,6 +80,7 @@ interface AppContextType {
   metrics: DashboardMetrics;
   isLoading: boolean;
   refreshData: () => Promise<void>;
+  dbConnectionError: string | null;
 
   toasts: ToastMessage[];
   showToast: (message: string, type?: ToastMessage['type']) => void;
@@ -111,6 +112,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [dbConnectionError, setDbConnectionError] = useState<string | null>(null);
 
   const showToast = useCallback((message: string, type: ToastMessage['type'] = 'success') => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -127,6 +129,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Fetch all initial data from Postgres via API routes
   const refreshData = useCallback(async () => {
     try {
+      const endpoints = [
+        '/api/users',
+        '/api/customers',
+        '/api/products',
+        '/api/plans',
+        '/api/quotations',
+        '/api/subscriptions',
+        '/api/invoices',
+        '/api/payments',
+        '/api/tax-rules',
+        '/api/discounts',
+      ];
+
+      const responses = await Promise.all(
+        endpoints.map((ep) =>
+          fetch(ep).catch((err) => ({
+            ok: false,
+            status: 0,
+            json: async () => ({ error: err.message }),
+          }))
+        )
+      );
+
+      const failedIndex = responses.findIndex((r) => !r.ok);
+      if (failedIndex !== -1) {
+        const failedResp = responses[failedIndex];
+        let detail = `Status ${failedResp.status || 'Network Error'} on ${endpoints[failedIndex]}`;
+        try {
+          const errData = await failedResp.json();
+          if (errData.error) detail = `${errData.error}`;
+        } catch {}
+        setDbConnectionError(detail);
+        console.warn('[AppContext] Database sync issue detected:', detail);
+      } else {
+        setDbConnectionError(null);
+      }
+
       const [
         usersRes,
         customersRes,
@@ -138,18 +177,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         paymentsRes,
         taxesRes,
         discountsRes,
-      ] = await Promise.all([
-        fetch('/api/users').then((r) => (r.ok ? r.json() : [])),
-        fetch('/api/customers').then((r) => (r.ok ? r.json() : [])),
-        fetch('/api/products').then((r) => (r.ok ? r.json() : [])),
-        fetch('/api/plans').then((r) => (r.ok ? r.json() : [])),
-        fetch('/api/quotations').then((r) => (r.ok ? r.json() : [])),
-        fetch('/api/subscriptions').then((r) => (r.ok ? r.json() : [])),
-        fetch('/api/invoices').then((r) => (r.ok ? r.json() : [])),
-        fetch('/api/payments').then((r) => (r.ok ? r.json() : [])),
-        fetch('/api/tax-rules').then((r) => (r.ok ? r.json() : [])),
-        fetch('/api/discounts').then((r) => (r.ok ? r.json() : [])),
-      ]);
+      ] = await Promise.all(
+        responses.map(async (r) => {
+          if (!r.ok) return [];
+          try {
+            return await r.json();
+          } catch {
+            return [];
+          }
+        })
+      );
 
       setUsers(usersRes);
       if (usersRes.length > 0) {
@@ -167,8 +204,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setPayments(paymentsRes);
       setTaxRules(taxesRes);
       setDiscounts(discountsRes);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load database data:', err);
+      setDbConnectionError(err.message || 'Network error syncing with PostgreSQL');
       showToast('Error syncing with database', 'error');
     } finally {
       setIsLoading(false);
@@ -704,6 +742,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         metrics,
         isLoading,
         refreshData,
+        dbConnectionError,
         toasts,
         showToast,
         removeToast,
