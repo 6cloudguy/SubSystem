@@ -46,7 +46,7 @@ export function Sidebar() {
       items: [
         {
           name: 'Dashboard',
-          href: '/',
+          href: '/dashboard',
           icon: LayoutDashboard,
         },
       ],
@@ -156,7 +156,7 @@ export function Sidebar() {
               <div className="space-y-0.5 pt-1">
                 {visibleItems.map((item) => {
                   const isActive =
-                    item.href === '/'
+                    item.href === '/dashboard'
                       ? pathname === '/' || pathname === '/dashboard'
                       : pathname.startsWith(item.href);
                   const Icon = item.icon;
