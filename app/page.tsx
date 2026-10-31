@@ -5,8 +5,6 @@ import Link from 'next/link';
 import {
   Sparkles,
   ArrowRight,
-  CheckCircle2,
-  LayoutDashboard,
   FileCheck2,
   RefreshCw,
   Receipt,
@@ -18,15 +16,11 @@ import {
   BarChart3,
   Zap,
   Lock,
-  Globe,
-  ChevronRight,
   Menu,
   X,
   Play,
   Star,
   TrendingUp,
-  Clock,
-  Bell,
 } from 'lucide-react';
 
 /* ─────────────────────── Theme Constants ─────────────────────── */
@@ -49,8 +43,6 @@ function Navbar() {
   const navLinks = [
     { label: 'Features', href: '#features' },
     { label: 'How It Works', href: '#how-it-works' },
-    { label: 'Pricing', href: '#pricing' },
-    { label: 'Security', href: '#security' },
   ];
 
   return (
@@ -284,35 +276,6 @@ function HeroSection() {
   );
 }
 
-/* ─────────────────────── Stats Bar ─────────────────────── */
-function StatsBar() {
-  const stats = [
-    { value: '99.9%', label: 'Uptime SLA' },
-    { value: '< 2s', label: 'Avg Response Time' },
-    { value: '0', label: 'Duplicate Invoices' },
-    { value: '100%', label: 'Decimal-safe Math' },
-  ];
-
-  return (
-    <section className="py-12 border-y" style={{ borderColor: theme.border, backgroundColor: theme.bgSubtle }}>
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold" style={{ color: theme.orange }}>
-                {stat.value}
-              </div>
-              <div className="text-sm mt-1 font-medium" style={{ color: theme.muted }}>
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ─────────────────────── Features Section ─────────────────────── */
 function FeaturesSection() {
   const features = [
@@ -509,358 +472,6 @@ function HowItWorksSection() {
   );
 }
 
-/* ─────────────────────── Subscription Lifecycle Section ─────────────────────── */
-function LifecycleSection() {
-  const states = [
-    { label: 'Draft', description: 'Subscription created' },
-    { label: 'Quotation', description: 'Sent to customer' },
-    { label: 'Confirmed', description: 'Customer accepted' },
-    { label: 'Active', description: 'Billing in progress' },
-    { label: 'Closed', description: 'Term completed' },
-  ];
-
-  const actions = [
-    { action: 'Pause', detail: 'Only if plan permits; records pause date' },
-    { action: 'Resume', detail: 'Recalculates billing schedule' },
-    { action: 'Early Close', detail: 'Checks plan permission & prorating' },
-    { action: 'Renew', detail: 'Creates next term without duplicates' },
-    { action: 'Auto-close', detail: 'Triggered by plan end-date rules' },
-  ];
-
-  return (
-    <section className="py-20 sm:py-28 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Left — Content */}
-          <div>
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 border"
-              style={{ backgroundColor: theme.orangeLight, color: theme.orange, borderColor: '#FFD6B3' }}
-            >
-              LIFECYCLE MANAGEMENT
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4" style={{ color: theme.black }}>
-              Complete subscription lifecycle control
-            </h2>
-            <p className="text-base mb-8" style={{ color: theme.muted }}>
-              Every subscription action is governed by plan-configured business rules. No unauthorized pauses, no accidental closures.
-            </p>
-
-            {/* Actions list */}
-            <div className="space-y-3">
-              {actions.map((a) => (
-                <div key={a.action} className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0" style={{ color: theme.orange }} />
-                  <div>
-                    <span className="text-sm font-semibold" style={{ color: theme.black }}>{a.action}</span>
-                    <span className="text-sm ml-1" style={{ color: theme.muted }}>— {a.detail}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right — State Flow Visual */}
-          <div className="bg-white rounded-2xl border p-8 shadow-sm" style={{ borderColor: theme.border }}>
-            <div className="text-sm font-semibold mb-6" style={{ color: theme.black }}>
-              Subscription State Flow
-            </div>
-            <div className="space-y-0">
-              {states.map((state, i) => (
-                <div key={state.label}>
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
-                      style={{ backgroundColor: i === 3 ? theme.orange : i === 4 ? theme.black : theme.bgLight, color: i < 3 ? theme.black : theme.white }}
-                    >
-                      {i + 1}
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-semibold" style={{ color: theme.black }}>{state.label}</div>
-                      <div className="text-xs" style={{ color: theme.muted }}>{state.description}</div>
-                    </div>
-                    {i === 3 && (
-                      <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ backgroundColor: theme.orangeLight, color: theme.orange }}>
-                        CURRENT
-                      </span>
-                    )}
-                  </div>
-                  {i < states.length - 1 && (
-                    <div className="ml-5 h-6 border-l-2 border-dashed" style={{ borderColor: theme.border }} />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────── Pricing Section ─────────────────────── */
-function PricingSection() {
-  const plans = [
-    {
-      name: 'Starter',
-      price: '29',
-      period: '/month',
-      description: 'Perfect for small teams getting started with subscription management.',
-      features: [
-        'Up to 100 active subscriptions',
-        'Product & variant catalog',
-        'Quotation management',
-        'Basic invoicing',
-        'Payment tracking',
-        'Email support',
-      ],
-      cta: 'Start Free Trial',
-      popular: false,
-    },
-    {
-      name: 'Professional',
-      price: '79',
-      period: '/month',
-      description: 'For growing businesses that need automation and advanced controls.',
-      features: [
-        'Up to 1,000 active subscriptions',
-        'Automated recurring billing',
-        'Plan lifecycle rules',
-        'Tax & discount engine',
-        'Dashboard & KPI reports',
-        'Role-based access control',
-        'Audit logging',
-        'Priority support',
-      ],
-      cta: 'Start Free Trial',
-      popular: true,
-    },
-    {
-      name: 'Enterprise',
-      price: 'Custom',
-      period: '',
-      description: 'Tailored for large organizations with complex subscription workflows.',
-      features: [
-        'Unlimited subscriptions',
-        'Custom billing intervals',
-        'Multi-currency support',
-        'Advanced security & SSO',
-        'Custom integrations',
-        'Dedicated account manager',
-        'SLA guarantee',
-        'On-premise deployment option',
-      ],
-      cta: 'Contact Sales',
-      popular: false,
-    },
-  ];
-
-  return (
-    <section id="pricing" className="py-20 sm:py-28 px-6" style={{ backgroundColor: theme.bgSubtle }}>
-      <div className="max-w-6xl mx-auto">
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 border"
-            style={{ backgroundColor: theme.orangeLight, color: theme.orange, borderColor: '#FFD6B3' }}
-          >
-            PRICING
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4" style={{ color: theme.black }}>
-            Simple, transparent pricing
-          </h2>
-          <p className="text-base sm:text-lg" style={{ color: theme.muted }}>
-            Start free for 14 days. No credit card required. Scale as you grow.
-          </p>
-        </div>
-
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className="rounded-2xl border bg-white p-8 relative transition-all hover:shadow-lg"
-              style={{
-                borderColor: plan.popular ? theme.orange : theme.border,
-                borderWidth: plan.popular ? 2 : 1,
-              }}
-            >
-              {plan.popular && (
-                <div
-                  className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-xs font-bold px-4 py-1 rounded-full text-white"
-                  style={{ backgroundColor: theme.orange }}
-                >
-                  MOST POPULAR
-                </div>
-              )}
-              <div className="text-base font-semibold mb-1" style={{ color: theme.black }}>
-                {plan.name}
-              </div>
-              <p className="text-sm mb-5" style={{ color: theme.muted }}>
-                {plan.description}
-              </p>
-              <div className="flex items-baseline gap-1 mb-6">
-                {plan.price !== 'Custom' && <span className="text-sm" style={{ color: theme.muted }}>$</span>}
-                <span className="text-4xl font-bold" style={{ color: theme.black }}>
-                  {plan.price}
-                </span>
-                {plan.period && (
-                  <span className="text-sm" style={{ color: theme.muted }}>
-                    {plan.period}
-                  </span>
-                )}
-              </div>
-              <a
-                href="/dashboard"
-                className="block text-center text-sm font-semibold py-3 rounded-xl transition-all mb-6"
-                style={
-                  plan.popular
-                    ? { backgroundColor: theme.orange, color: theme.white }
-                    : { backgroundColor: theme.white, color: theme.black, border: `1px solid ${theme.border}` }
-                }
-              >
-                {plan.cta}
-              </a>
-              <div className="space-y-3">
-                {plan.features.map((f) => (
-                  <div key={f} className="flex items-start gap-2.5">
-                    <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" style={{ color: theme.orange }} />
-                    <span className="text-sm" style={{ color: theme.muted }}>
-                      {f}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────── Security Section ─────────────────────── */
-function SecuritySection() {
-  const items = [
-    {
-      icon: Lock,
-      title: 'Password Hashing',
-      description: 'Argon2id or bcrypt with suitable work factors. Raw passwords are never stored.',
-    },
-    {
-      icon: ShieldCheck,
-      title: 'Secure Sessions',
-      description: 'HttpOnly, SameSite cookies with CSRF protection for state-changing requests.',
-    },
-    {
-      icon: Clock,
-      title: 'Rate Limiting',
-      description: 'Login and password-reset endpoints are rate-limited with short-lived, single-use tokens.',
-    },
-    {
-      icon: Bell,
-      title: 'Audit Logging',
-      description: 'Every sensitive operation is recorded with actor, timestamp, and before/after metadata.',
-    },
-    {
-      icon: Users2,
-      title: 'Least-privilege Access',
-      description: 'Role-based authorization enforced server-side. Customers only access their own records.',
-    },
-    {
-      icon: Globe,
-      title: 'HTTPS & Network Security',
-      description: 'Encrypted in transit for production. Development restricted to trusted private subnets.',
-    },
-  ];
-
-  return (
-    <section id="security" className="py-20 sm:py-28 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 border"
-            style={{ backgroundColor: theme.orangeLight, color: theme.orange, borderColor: '#FFD6B3' }}
-          >
-            SECURITY
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4" style={{ color: theme.black }}>
-            Enterprise-grade security, built in
-          </h2>
-          <p className="text-base sm:text-lg" style={{ color: theme.muted }}>
-            Your financial data deserves the highest level of protection. Every layer of BrightLoop is built with security first.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
-            <div
-              key={item.title}
-              className="flex gap-4 p-5 rounded-xl border bg-white transition-all hover:shadow-md"
-              style={{ borderColor: theme.border }}
-            >
-              <div
-                className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: theme.orangeLight }}
-              >
-                <item.icon className="h-5 w-5" style={{ color: theme.orange }} />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold mb-1" style={{ color: theme.black }}>
-                  {item.title}
-                </h3>
-                <p className="text-sm leading-relaxed" style={{ color: theme.muted }}>
-                  {item.description}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────── Tech Stack Section ─────────────────────── */
-function TechStackSection() {
-  const stack = [
-    { name: 'Next.js', detail: 'Full-stack React framework' },
-    { name: 'TypeScript', detail: 'Type-safe development' },
-    { name: 'PostgreSQL', detail: 'Relational database' },
-    { name: 'Prisma', detail: 'Type-safe ORM' },
-    { name: 'Tailwind CSS', detail: 'Utility-first styling' },
-    { name: 'Recharts', detail: 'Dashboard visualizations' },
-  ];
-
-  return (
-    <section className="py-16 px-6 border-y" style={{ borderColor: theme.border, backgroundColor: theme.bgSubtle }}>
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <h3 className="text-lg font-semibold" style={{ color: theme.black }}>
-            Built with modern, production-ready technologies
-          </h3>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {stack.map((tech) => (
-            <div
-              key={tech.name}
-              className="text-center px-4 py-5 rounded-xl bg-white border transition-all hover:shadow-md"
-              style={{ borderColor: theme.border }}
-            >
-              <div className="text-sm font-bold mb-1" style={{ color: theme.black }}>
-                {tech.name}
-              </div>
-              <div className="text-xs" style={{ color: theme.muted }}>
-                {tech.detail}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ─────────────────────── CTA Section ─────────────────────── */
 function CtaSection() {
   return (
@@ -910,7 +521,7 @@ function CtaSection() {
 /* ─────────────────────── Footer ─────────────────────── */
 function Footer() {
   const footerLinks = {
-    Product: ['Features', 'Pricing', 'Dashboard', 'Integrations', 'Changelog'],
+    Product: ['Features', 'Dashboard', 'Integrations', 'Changelog'],
     Resources: ['Documentation', 'API Reference', 'Help Center', 'Status Page', 'Blog'],
     Company: ['About', 'Careers', 'Contact', 'Partners', 'Legal'],
   };
@@ -982,13 +593,8 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white" style={{ fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
       <Navbar />
       <HeroSection />
-      <StatsBar />
       <FeaturesSection />
       <HowItWorksSection />
-      <LifecycleSection />
-      <PricingSection />
-      <SecuritySection />
-      <TechStackSection />
       <CtaSection />
       <Footer />
     </div>
