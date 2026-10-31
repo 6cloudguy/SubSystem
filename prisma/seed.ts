@@ -12,6 +12,7 @@ const seedUsers = [
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80',
     assignedCustomersCount: 12,
     createdAt: '2026-01-15T09:00:00Z',
+    passwordHash: '$2b$10$7hHVnWTrqYiXWsfb8yN44OasO.TNSHXigqVyVxjHIA4rL84.crUcS',
   },
   {
     id: 'user-2',
@@ -22,6 +23,7 @@ const seedUsers = [
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80',
     assignedCustomersCount: 8,
     createdAt: '2026-02-01T10:30:00Z',
+    passwordHash: '$2b$10$RT/0M1zc1HoHp8mMRhxzIelz16JrHg5zaI9qIi5OZkeySPWPWDBU.',
   },
   {
     id: 'user-3',
@@ -32,6 +34,7 @@ const seedUsers = [
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
     assignedCustomersCount: 6,
     createdAt: '2026-03-10T14:15:00Z',
+    passwordHash: '$2b$10$RT/0M1zc1HoHp8mMRhxzIelz16JrHg5zaI9qIi5OZkeySPWPWDBU.',
   },
   {
     id: 'user-4',
@@ -42,6 +45,7 @@ const seedUsers = [
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80',
     assignedCustomersCount: 0,
     createdAt: '2026-01-20T11:00:00Z',
+    passwordHash: '$2b$10$RT/0M1zc1HoHp8mMRhxzIelz16JrHg5zaI9qIi5OZkeySPWPWDBU.',
   },
 ];
 

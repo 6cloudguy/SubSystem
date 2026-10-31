@@ -78,14 +78,14 @@ function Navbar() {
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
           <Link
-            href="/dashboard"
+            href="/login"
             className="text-sm font-medium px-4 py-2 rounded-lg transition-colors hover:bg-gray-50"
             style={{ color: theme.black }}
           >
             Sign In
           </Link>
           <Link
-            href="/dashboard"
+            href="/login"
             className="text-sm font-medium px-5 py-2.5 rounded-lg text-white shadow-md transition-all hover:shadow-lg hover:scale-[1.02]"
             style={{ backgroundColor: theme.orange }}
           >
@@ -127,11 +127,11 @@ function Navbar() {
             </a>
           ))}
           <div className="pt-3 border-t border-gray-100 space-y-2">
-            <Link href="/dashboard" className="block text-sm font-medium py-2" style={{ color: theme.black }}>
+            <Link href="/login" className="block text-sm font-medium py-2" style={{ color: theme.black }}>
               Sign In
             </Link>
             <Link
-              href="/dashboard"
+              href="/login"
               className="block text-center text-sm font-medium px-5 py-2.5 rounded-lg text-white"
               style={{ backgroundColor: theme.orange }}
             >
@@ -204,7 +204,7 @@ function HeroSection() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4">
             <Link
-              href="/dashboard"
+              href="/login"
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-base shadow-xl transition-all hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
               style={{ backgroundColor: theme.orange }}
             >
@@ -558,7 +558,7 @@ function CtaSection() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4">
               <Link
-                href="/dashboard"
+                href="/login"
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-white font-semibold text-base shadow-xl transition-all hover:shadow-2xl hover:scale-[1.02]"
                 style={{ backgroundColor: theme.orange }}
               >

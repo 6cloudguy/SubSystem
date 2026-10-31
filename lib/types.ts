@@ -10,6 +10,7 @@ export interface User {
   avatarUrl?: string;
   assignedCustomersCount?: number;
   lastActive?: string;
+  passwordHash?: string;
   createdAt: string;
 }
 

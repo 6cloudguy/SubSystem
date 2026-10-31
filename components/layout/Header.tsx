@@ -15,12 +15,25 @@ import {
   Settings,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function Header() {
   const { currentUser, invoices } = useApp();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    setShowUserMenu(false);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      // ignore
+    }
+    router.push('/login');
+  };
 
   const overdueInvoices = invoices.filter((i) => i.status === 'OVERDUE');
 
